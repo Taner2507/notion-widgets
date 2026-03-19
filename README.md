@@ -1,71 +1,46 @@
-# Notion Widget Starter
+# Notion Widget Studio
 
-This project is a customizable embeddable widget you can host publicly and place inside Notion using `/embed`.
+This project is now a small Notion widget platform, not just a single widget page.
 
-## What this project includes
+## Included widget types
 
-- `index.html`: the widget markup
-- `styles.css`: styling for the widget card and settings panel
-- `script.js`: live clock, themes, saved settings, and shareable embed URLs
+- Focus Clock
+- Countdown
+- Quote Card
+- Spotify Card
 
-## Customization features
+## How the platform works
 
-- Built-in settings panel
-- Theme presets
-- Multiple layout variants
-- Accent color picker
-- 12-hour or 24-hour time
-- Optional seconds display
-- Optional date line
-- Custom prompt list
-- Saved named variations
-- Shareable URL parameters for reuse in multiple Notion pages
+1. Open the hosted page.
+2. Pick a widget type.
+3. Customize the fields.
+4. Save a named variation if you want to reuse it.
+5. Click `Copy embed URL`.
+6. Paste that link into Notion using `/embed`.
 
-## Fastest hosting option: GitHub Pages
+## Why this is useful
 
-1. Create a new GitHub repository.
-2. Upload these files to the repository root.
-3. Push the repository to GitHub.
-4. In GitHub, open `Settings` -> `Pages`.
-5. Under `Build and deployment`, choose:
-   - `Source`: `Deploy from a branch`
-   - `Branch`: `main`
-   - `Folder`: `/ (root)`
-6. Save and wait for GitHub Pages to publish.
-7. GitHub gives you a public URL like:
+- One hosted page can generate many widget links.
+- Each saved variation can be reused across different Notion pages.
+- The embed URL uses an encoded config payload, so the rendered widget stays clean.
+- No backend is required for this version.
 
-   `https://your-username.github.io/your-repo-name/`
+## Spotify in Notion
 
-## How to add it to Notion
+There are two common ways people add Spotify to Notion:
 
-1. Copy the public GitHub Pages URL.
-2. In Notion, type `/embed`.
-3. Paste the URL.
-4. Resize the embed block until it fits the widget well.
+1. Paste a Spotify share link directly into Notion and choose `Create embed`.
+2. Use a custom hosted widget page that contains a Spotify embed iframe.
 
-## Reuse the widget with different configurations
+This project supports the second option through the Spotify Card widget.
 
-After you customize the widget, use the `Copy embed URL` button. That generated URL includes the current settings as query parameters.
+## Hosting
 
-Example:
+GitHub Pages is fine for this version because the whole app is static.
 
-`https://your-username.github.io/your-repo-name/?label=Deep%20Work&theme=ocean&seconds=true`
+## Next upgrades if you want to keep building
 
-That lets you create multiple versions of the same widget for different Notion pages.
-
-You can also save named variations inside the customization panel. Each saved variation has its own `Copy link` button, which is the closest static-site workflow to how Indify generates separate widget URLs.
-
-## Local preview
-
-You can open `index.html` directly in a browser for a quick preview.
-
-## Customization ideas
-
-- Add a countdown mode
-- Add a Pomodoro mode
-- Connect to a weather API
-- Build a habit tracker or KPI card set
-
-## Important note
-
-Notion does not run your widget code natively. The widget must be hosted somewhere public, then embedded into Notion.
+- Add Pomodoro
+- Add weather
+- Add a widget gallery landing page with categories
+- Add a backend later for short permanent widget URLs

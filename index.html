@@ -3,153 +3,97 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notion Widget Starter</title>
+    <title>Notion Widget Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="widget-shell">
-      <section id="widgetCard" class="widget-card" aria-label="Daily focus widget">
-        <div class="card-topbar">
-          <p id="eyebrow" class="eyebrow">Notion Embed Widget</p>
-          <button
-            id="toggleSettingsButton"
-            class="ghost-button"
-            type="button"
-            aria-expanded="false"
-            aria-controls="settingsPanel"
-          >
-            Customize
-          </button>
-        </div>
-        <h1 id="todayLabel" class="title">Today</h1>
-        <div class="time-row">
-          <span id="clock" class="clock">00:00</span>
-          <span id="period" class="period">AM</span>
-        </div>
-        <p id="dateText" class="date-text">Thursday, March 19</p>
-        <div class="divider"></div>
-        <div class="focus-panel">
-          <p class="focus-label">Focus Prompt</p>
-          <p id="focusText" class="focus-text">
-            Pick one meaningful task and finish it before opening anything new.
+    <main id="studioApp" class="studio-shell">
+      <header class="hero-panel">
+        <div class="hero-copy">
+          <p class="hero-kicker">Notion Widget Studio</p>
+          <h1 class="hero-title">Build custom widget links you can paste straight into Notion.</h1>
+          <p class="hero-text">
+            Choose a widget type, tune the design, save named variations, and copy an embed-ready
+            URL. This is a lightweight Notion widget platform that runs from one hosted page.
           </p>
         </div>
-        <button id="shuffleButton" class="shuffle-button" type="button">
-          New prompt
-        </button>
-      </section>
-      <section
-        id="settingsPanel"
-        class="settings-panel"
-        aria-label="Widget customization"
-        hidden
-      >
-        <div class="settings-header">
-          <div>
-            <p class="settings-kicker">Customization</p>
-            <h2 class="settings-title">Tune this widget for your page</h2>
-          </div>
-          <button id="closeSettingsButton" class="ghost-button" type="button">
-            Close
-          </button>
+        <div class="hero-note">
+          <p class="hero-note-label">Current workflow</p>
+          <p class="hero-note-text">Create widget -> Save variation -> Copy embed link -> Paste into Notion</p>
         </div>
-        <form id="settingsForm" class="settings-form">
-          <label class="field">
-            <span class="field-label">Top label</span>
-            <input id="eyebrowInput" class="field-input" type="text" maxlength="40" />
-          </label>
-          <label class="field">
-            <span class="field-label">Theme</span>
-            <select id="themeSelect" class="field-input">
-              <option value="warm">Warm Paper</option>
-              <option value="ocean">Soft Ocean</option>
-              <option value="forest">Forest Glass</option>
-              <option value="midnight">Midnight</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="field-label">Layout style</span>
-            <select id="variantSelect" class="field-input">
-              <option value="classic">Classic Card</option>
-              <option value="compact">Compact Stack</option>
-              <option value="spotlight">Spotlight</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="field-label">Accent color</span>
-            <input id="accentInput" class="field-input color-input" type="color" />
-          </label>
-          <label class="field checkbox-field">
-            <input id="showSecondsInput" type="checkbox" />
-            <span>Show seconds</span>
-          </label>
-          <label class="field checkbox-field">
-            <input id="use24HourInput" type="checkbox" />
-            <span>Use 24-hour time</span>
-          </label>
-          <label class="field checkbox-field">
-            <input id="showDateInput" type="checkbox" />
-            <span>Show date line</span>
-          </label>
-          <label class="field">
-            <span class="field-label">Prompts</span>
-            <textarea
-              id="promptsInput"
-              class="field-input field-textarea"
-              rows="6"
-              placeholder="One prompt per line"
-            ></textarea>
-          </label>
-          <div class="settings-actions">
-            <button class="shuffle-button settings-submit" type="submit">Apply settings</button>
-            <button id="resetButton" class="secondary-button" type="button">Reset</button>
-          </div>
-          <label class="field">
-            <span class="field-label">Shareable embed URL</span>
-            <input id="shareUrlInput" class="field-input" type="text" readonly />
-          </label>
-          <button id="copyLinkButton" class="secondary-button" type="button">
-            Copy embed URL
-          </button>
-          <div class="variation-builder">
-            <div class="variation-builder-header">
-              <div>
-                <p class="field-label">Saved variations</p>
-                <p class="field-help">Create multiple versions and paste each generated link into Notion.</p>
-              </div>
+      </header>
+
+      <section class="studio-grid">
+        <section class="builder-panel" aria-label="Widget builder">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">1. Pick a widget</p>
+              <h2 class="panel-title">Widget types</h2>
             </div>
+          </div>
+          <div id="widgetPicker" class="widget-picker"></div>
+
+          <div class="panel-header panel-header-spaced">
+            <div>
+              <p class="panel-kicker">2. Customize it</p>
+              <h2 id="builderTitle" class="panel-title">Builder</h2>
+            </div>
+          </div>
+
+          <form id="builderForm" class="builder-form">
             <label class="field">
               <span class="field-label">Variation name</span>
-              <input
-                id="variationNameInput"
-                class="field-input"
-                type="text"
-                maxlength="50"
-                placeholder="Study dashboard"
-              />
+              <input id="variationNameInput" class="field-input" type="text" maxlength="60" placeholder="Morning dashboard" />
             </label>
-            <div class="variation-actions">
-              <button id="saveVariationButton" class="shuffle-button settings-submit" type="button">
-                Save variation
-              </button>
-              <button id="newVariationButton" class="secondary-button" type="button">
-                New variation
-              </button>
+            <div id="builderFields" class="builder-fields"></div>
+            <div class="builder-actions">
+              <button id="applyButton" class="primary-button" type="submit">Apply changes</button>
+              <button id="resetButton" class="secondary-button" type="button">Reset</button>
             </div>
-            <div id="variationEmptyState" class="empty-state">
-              No saved variations yet.
+            <label class="field">
+              <span class="field-label">Embed URL</span>
+              <input id="shareUrlInput" class="field-input" type="text" readonly />
+            </label>
+            <div class="builder-actions">
+              <button id="copyLinkButton" class="secondary-button" type="button">Copy embed URL</button>
+              <button id="saveVariationButton" class="primary-button primary-button-soft" type="button">Save variation</button>
             </div>
-            <div id="savedVariationsList" class="variation-list"></div>
+          </form>
+        </section>
+
+        <section class="preview-panel" aria-label="Widget preview and saved variations">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">3. Preview</p>
+              <h2 class="panel-title">Live widget</h2>
+            </div>
+            <div id="previewMeta" class="preview-meta"></div>
           </div>
-        </form>
+          <div id="previewMount" class="preview-mount"></div>
+
+          <div class="panel-header panel-header-spaced">
+            <div>
+              <p class="panel-kicker">4. Reuse it</p>
+              <h2 class="panel-title">Saved variations</h2>
+            </div>
+            <button id="newVariationButton" class="ghost-button" type="button">New draft</button>
+          </div>
+          <div id="variationEmptyState" class="empty-state">No saved widgets yet. Save one and it will appear here.</div>
+          <div id="savedVariationsList" class="variation-list"></div>
+        </section>
       </section>
     </main>
+
+    <main id="embedApp" class="embed-shell" hidden>
+      <div id="embedMount" class="embed-mount"></div>
+    </main>
+
     <script src="script.js"></script>
   </body>
 </html>

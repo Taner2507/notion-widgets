@@ -1,390 +1,805 @@
-const defaultSettings = {
-  eyebrow: "Notion Embed Widget",
-  theme: "warm",
-  variant: "classic",
-  accent: "#c96f3b",
-  showSeconds: false,
-  use24Hour: false,
-  showDate: true,
-  prompts: [
-    "Pick one meaningful task and finish it before opening anything new.",
-    "Make the next 25 minutes distraction-free.",
-    "Ship the smallest complete version, not the biggest idea.",
-    "Clear one stubborn task you have been postponing.",
-    "Protect your energy by doing the hard part first."
-  ]
-};
-
-const themeMap = {
+const themes = {
   warm: {
-    bgTop: "#f6efe4",
-    bgBottom: "#f7fbff",
-    card: "rgba(255, 252, 246, 0.88)",
-    panel: "rgba(255, 255, 255, 0.72)",
-    cardBorder: "rgba(113, 90, 59, 0.12)",
-    textStrong: "#1f2933",
-    textSoft: "#5c6670",
-    accentDeep: "#7e4020",
-    shadow: "0 24px 60px rgba(70, 52, 28, 0.14)"
+    pageTop: "#f7f1e7",
+    pageBottom: "#edf5ff",
+    panel: "rgba(255, 250, 242, 0.76)",
+    panelStrong: "rgba(255, 255, 255, 0.82)",
+    panelBorder: "rgba(99, 74, 43, 0.12)",
+    textStrong: "#1e2932",
+    textSoft: "#5d6873",
+    accentStrong: "#8a4722",
+    widgetCard: "rgba(255, 249, 241, 0.88)",
+    shadow: "0 24px 60px rgba(65, 47, 30, 0.12)"
   },
   ocean: {
-    bgTop: "#e3f4ff",
-    bgBottom: "#eefaf4",
-    card: "rgba(246, 252, 255, 0.82)",
-    panel: "rgba(241, 250, 255, 0.75)",
-    cardBorder: "rgba(47, 94, 127, 0.14)",
-    textStrong: "#173042",
-    textSoft: "#507083",
-    accentDeep: "#12506c",
-    shadow: "0 24px 60px rgba(26, 74, 94, 0.16)"
+    pageTop: "#e4f6ff",
+    pageBottom: "#eef8f3",
+    panel: "rgba(245, 252, 255, 0.76)",
+    panelStrong: "rgba(255, 255, 255, 0.84)",
+    panelBorder: "rgba(38, 89, 121, 0.14)",
+    textStrong: "#173447",
+    textSoft: "#547288",
+    accentStrong: "#155570",
+    widgetCard: "rgba(241, 251, 255, 0.9)",
+    shadow: "0 24px 60px rgba(28, 78, 96, 0.14)"
   },
   forest: {
-    bgTop: "#edf6ea",
-    bgBottom: "#f6f3e8",
-    card: "rgba(250, 255, 248, 0.84)",
-    panel: "rgba(249, 252, 245, 0.76)",
-    cardBorder: "rgba(78, 107, 71, 0.14)",
-    textStrong: "#1f3126",
-    textSoft: "#566a58",
-    accentDeep: "#365b33",
-    shadow: "0 24px 60px rgba(54, 80, 49, 0.15)"
+    pageTop: "#eef8ea",
+    pageBottom: "#f9f3e6",
+    panel: "rgba(249, 255, 246, 0.76)",
+    panelStrong: "rgba(255, 255, 255, 0.84)",
+    panelBorder: "rgba(68, 108, 67, 0.14)",
+    textStrong: "#223225",
+    textSoft: "#5d6f60",
+    accentStrong: "#3d623c",
+    widgetCard: "rgba(248, 255, 246, 0.9)",
+    shadow: "0 24px 60px rgba(47, 79, 46, 0.14)"
   },
   midnight: {
-    bgTop: "#151d2d",
-    bgBottom: "#24334a",
-    card: "rgba(12, 20, 35, 0.72)",
-    panel: "rgba(13, 24, 41, 0.74)",
-    cardBorder: "rgba(165, 193, 229, 0.14)",
-    textStrong: "#eef5ff",
-    textSoft: "#adc0d6",
-    accentDeep: "#ffd0aa",
-    shadow: "0 24px 60px rgba(3, 8, 17, 0.42)"
+    pageTop: "#121a2a",
+    pageBottom: "#233149",
+    panel: "rgba(14, 22, 36, 0.76)",
+    panelStrong: "rgba(18, 28, 44, 0.84)",
+    panelBorder: "rgba(164, 188, 214, 0.12)",
+    textStrong: "#f0f6ff",
+    textSoft: "#adbfd3",
+    accentStrong: "#ffd7af",
+    widgetCard: "rgba(16, 25, 41, 0.88)",
+    shadow: "0 24px 60px rgba(3, 9, 18, 0.42)"
   }
 };
 
-const clockElement = document.getElementById("clock");
-const periodElement = document.getElementById("period");
-const dateTextElement = document.getElementById("dateText");
-const todayLabelElement = document.getElementById("todayLabel");
-const focusTextElement = document.getElementById("focusText");
-const shuffleButton = document.getElementById("shuffleButton");
-const eyebrowElement = document.getElementById("eyebrow");
-const widgetCardElement = document.getElementById("widgetCard");
-const settingsPanel = document.getElementById("settingsPanel");
-const settingsForm = document.getElementById("settingsForm");
-const toggleSettingsButton = document.getElementById("toggleSettingsButton");
-const closeSettingsButton = document.getElementById("closeSettingsButton");
-const resetButton = document.getElementById("resetButton");
-const copyLinkButton = document.getElementById("copyLinkButton");
-const shareUrlInput = document.getElementById("shareUrlInput");
+const widgets = {
+  clock: {
+    id: "clock",
+    name: "Focus Clock",
+    description: "A live clock with rotating focus prompts.",
+    defaults: {
+      theme: "warm",
+      layout: "classic",
+      accent: "#d66d37",
+      label: "Focus Clock",
+      title: "Today",
+      showDate: true,
+      showSeconds: false,
+      use24Hour: false,
+      prompts: "Pick one meaningful task and finish it before opening anything new.\nMake the next 25 minutes distraction-free.\nClear one stubborn task you have been postponing."
+    },
+    fields: [
+      { key: "label", label: "Top label", type: "text", maxLength: 40 },
+      { key: "title", label: "Title", type: "text", maxLength: 24 },
+      { key: "theme", label: "Theme", type: "select", options: themeOptions() },
+      { key: "layout", label: "Layout", type: "select", options: layoutOptions() },
+      { key: "accent", label: "Accent color", type: "color" },
+      { key: "showDate", label: "Show date", type: "checkbox" },
+      { key: "showSeconds", label: "Show seconds", type: "checkbox" },
+      { key: "use24Hour", label: "Use 24-hour time", type: "checkbox" },
+      { key: "prompts", label: "Prompts", type: "textarea", help: "One prompt per line." }
+    ]
+  },
+  countdown: {
+    id: "countdown",
+    name: "Countdown",
+    description: "Count down to launches, exams, trips, or deadlines.",
+    defaults: {
+      theme: "ocean",
+      layout: "spotlight",
+      accent: "#2e8dc2",
+      label: "Big Moment",
+      title: "Launch Day",
+      targetDate: getDefaultFutureDate(),
+      showSeconds: false,
+      completionText: "It is live."
+    },
+    fields: [
+      { key: "label", label: "Top label", type: "text", maxLength: 40 },
+      { key: "title", label: "Countdown title", type: "text", maxLength: 40 },
+      { key: "theme", label: "Theme", type: "select", options: themeOptions() },
+      { key: "layout", label: "Layout", type: "select", options: layoutOptions() },
+      { key: "accent", label: "Accent color", type: "color" },
+      { key: "targetDate", label: "Target date", type: "datetime-local" },
+      { key: "showSeconds", label: "Show seconds", type: "checkbox" },
+      { key: "completionText", label: "Completion message", type: "text", maxLength: 60 }
+    ]
+  },
+  quote: {
+    id: "quote",
+    name: "Quote Card",
+    description: "A styled quote for dashboards, journals, and covers.",
+    defaults: {
+      theme: "forest",
+      layout: "classic",
+      accent: "#56863f",
+      label: "Daily Quote",
+      quote: "Consistency is what transforms average into excellence.",
+      author: "Robin Sharma"
+    },
+    fields: [
+      { key: "label", label: "Top label", type: "text", maxLength: 40 },
+      { key: "quote", label: "Quote", type: "textarea", help: "Keep it reasonably short for narrow Notion embeds." },
+      { key: "author", label: "Author", type: "text", maxLength: 40 },
+      { key: "theme", label: "Theme", type: "select", options: themeOptions() },
+      { key: "layout", label: "Layout", type: "select", options: layoutOptions() },
+      { key: "accent", label: "Accent color", type: "color" }
+    ]
+  },
+  spotify: {
+    id: "spotify",
+    name: "Spotify Card",
+    description: "Wrap a Spotify track, album, or playlist in your own widget shell.",
+    defaults: {
+      theme: "midnight",
+      layout: "classic",
+      accent: "#1db954",
+      label: "Now Playing",
+      title: "Spotify Pick",
+      spotifyUrl: "https://open.spotify.com/track/7ouMYWpwJ422jRcDASZB7P",
+      note: "Paste a Spotify share link or embed link."
+    },
+    fields: [
+      { key: "label", label: "Top label", type: "text", maxLength: 40 },
+      { key: "title", label: "Title", type: "text", maxLength: 40 },
+      { key: "theme", label: "Theme", type: "select", options: themeOptions() },
+      { key: "layout", label: "Layout", type: "select", options: layoutOptions() },
+      { key: "accent", label: "Accent color", type: "color" },
+      { key: "spotifyUrl", label: "Spotify link", type: "url" },
+      { key: "note", label: "Helper text", type: "text", maxLength: 80 }
+    ]
+  }
+};
 
-const eyebrowInput = document.getElementById("eyebrowInput");
-const themeSelect = document.getElementById("themeSelect");
-const variantSelect = document.getElementById("variantSelect");
-const accentInput = document.getElementById("accentInput");
-const showSecondsInput = document.getElementById("showSecondsInput");
-const use24HourInput = document.getElementById("use24HourInput");
-const showDateInput = document.getElementById("showDateInput");
-const promptsInput = document.getElementById("promptsInput");
+const studioApp = document.getElementById("studioApp");
+const embedApp = document.getElementById("embedApp");
+const embedMount = document.getElementById("embedMount");
+const widgetPicker = document.getElementById("widgetPicker");
+const builderTitle = document.getElementById("builderTitle");
+const builderForm = document.getElementById("builderForm");
+const builderFields = document.getElementById("builderFields");
+const previewMount = document.getElementById("previewMount");
+const previewMeta = document.getElementById("previewMeta");
 const variationNameInput = document.getElementById("variationNameInput");
+const shareUrlInput = document.getElementById("shareUrlInput");
+const copyLinkButton = document.getElementById("copyLinkButton");
 const saveVariationButton = document.getElementById("saveVariationButton");
+const resetButton = document.getElementById("resetButton");
 const newVariationButton = document.getElementById("newVariationButton");
 const variationEmptyState = document.getElementById("variationEmptyState");
 const savedVariationsList = document.getElementById("savedVariationsList");
 
-let currentSettings = buildInitialSettings();
-let currentPromptIndex = 0;
+const initialStudioState = loadStudioState();
+
+let activeWidgetType = initialStudioState.type;
+let currentConfig = mergeConfig(activeWidgetType, initialStudioState.config);
 let activeVariationId = null;
 let savedVariations = loadSavedVariations();
+let liveTimer = null;
 
-function padTime(value) {
-  return String(value).padStart(2, "0");
+if (isEmbedMode()) {
+  renderEmbedView();
+} else {
+  renderStudio();
 }
 
-function buildInitialSettings() {
-  const storedSettings = loadStoredSettings();
-  const urlSettings = loadUrlSettings();
-
-  return mergeSettings(defaultSettings, storedSettings, urlSettings);
+function themeOptions() {
+  return [
+    { value: "warm", label: "Warm Paper" },
+    { value: "ocean", label: "Soft Ocean" },
+    { value: "forest", label: "Forest Glass" },
+    { value: "midnight", label: "Midnight" }
+  ];
 }
 
-function loadStoredSettings() {
-  try {
-    const rawSettings = window.localStorage.getItem("notion-widget-settings");
-    return rawSettings ? JSON.parse(rawSettings) : {};
-  } catch {
-    return {};
-  }
+function layoutOptions() {
+  return [
+    { value: "classic", label: "Classic Card" },
+    { value: "compact", label: "Compact Stack" },
+    { value: "spotlight", label: "Spotlight" }
+  ];
 }
 
-function loadUrlSettings() {
+function getDefaultFutureDate() {
+  const target = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+  const year = target.getFullYear();
+  const month = String(target.getMonth() + 1).padStart(2, "0");
+  const day = String(target.getDate()).padStart(2, "0");
+  const hours = String(target.getHours()).padStart(2, "0");
+  const minutes = String(target.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function isEmbedMode() {
+  return new URLSearchParams(window.location.search).get("mode") === "embed";
+}
+
+function renderStudio() {
+  studioApp.hidden = false;
+  embedApp.hidden = true;
+  renderWidgetPicker();
+  renderBuilder();
+  renderPreview();
+  renderVariations();
+}
+
+function renderEmbedView() {
+  studioApp.hidden = true;
+  embedApp.hidden = false;
+
   const params = new URLSearchParams(window.location.search);
-  const promptParam = params.get("prompts");
-  const prompts = promptParam
-    ? promptParam
-        .split("|")
-        .map((prompt) => prompt.trim())
-        .filter(Boolean)
-    : undefined;
+  const widgetType = params.get("widget");
+  const encodedConfig = params.get("config");
+  const parsedConfig = decodeConfig(encodedConfig);
 
+  if (!widgetType || !widgets[widgetType] || !parsedConfig) {
+    embedMount.innerHTML = `<section class="platform-widget"><p class="widget-copy">Invalid embed link. Return to the studio and generate a fresh URL.</p></section>`;
+    return;
+  }
+
+  const config = mergeConfig(widgetType, parsedConfig);
+  renderWidgetInto(embedMount, widgetType, config);
+}
+
+function renderWidgetPicker() {
+  widgetPicker.innerHTML = "";
+
+  Object.values(widgets).forEach((widget) => {
+    const card = document.createElement("button");
+    card.className = "widget-type-card";
+    card.type = "button";
+
+    if (widget.id === activeWidgetType) {
+      card.classList.add("is-active");
+    }
+
+    card.innerHTML = `
+      <p class="widget-type-kicker">${escapeHtml(widget.id)}</p>
+      <p class="widget-type-title">${escapeHtml(widget.name)}</p>
+      <p class="widget-copy">${escapeHtml(widget.description)}</p>
+    `;
+
+    card.addEventListener("click", () => {
+      activeWidgetType = widget.id;
+      activeVariationId = null;
+      variationNameInput.value = "";
+      currentConfig = mergeConfig(activeWidgetType, loadStudioStateForType(activeWidgetType));
+      saveStudioState(currentConfig);
+      renderStudio();
+    });
+
+    widgetPicker.appendChild(card);
+  });
+}
+
+function renderBuilder() {
+  const widget = widgets[activeWidgetType];
+  builderTitle.textContent = `${widget.name} builder`;
+  builderFields.innerHTML = "";
+
+  widget.fields.forEach((field) => {
+    builderFields.appendChild(createFieldElement(field, currentConfig[field.key]));
+  });
+
+  shareUrlInput.value = buildEmbedUrl(activeWidgetType, currentConfig);
+  saveVariationButton.textContent = activeVariationId ? "Update variation" : "Save variation";
+}
+
+function createFieldElement(field, value) {
+  const wrapper = document.createElement("label");
+  wrapper.className = `field${field.type === "checkbox" ? " field-checkbox" : ""}`;
+
+  if (field.type === "checkbox") {
+    wrapper.innerHTML = `
+      <input data-field-key="${field.key}" type="checkbox" ${value ? "checked" : ""} />
+      <span class="field-label">${escapeHtml(field.label)}</span>
+    `;
+    return wrapper;
+  }
+
+  const helpMarkup = field.help ? `<p class="field-help">${escapeHtml(field.help)}</p>` : "";
+
+  let inputMarkup = "";
+
+  if (field.type === "textarea") {
+    inputMarkup = `<textarea data-field-key="${field.key}" class="field-input field-textarea">${escapeHtml(value ?? "")}</textarea>`;
+  } else if (field.type === "select") {
+    const optionsMarkup = field.options
+      .map((option) => `<option value="${escapeHtml(option.value)}" ${option.value === value ? "selected" : ""}>${escapeHtml(option.label)}</option>`)
+      .join("");
+    inputMarkup = `<select data-field-key="${field.key}" class="field-input">${optionsMarkup}</select>`;
+  } else {
+    const maxLength = field.maxLength ? `maxlength="${field.maxLength}"` : "";
+    inputMarkup = `<input data-field-key="${field.key}" class="field-input" type="${field.type}" value="${escapeHtml(value ?? "")}" ${maxLength} />`;
+  }
+
+  wrapper.innerHTML = `
+    <span class="field-label">${escapeHtml(field.label)}</span>
+    ${inputMarkup}
+    ${helpMarkup}
+  `;
+
+  return wrapper;
+}
+
+function renderPreview() {
+  renderWidgetInto(previewMount, activeWidgetType, currentConfig);
+  previewMeta.innerHTML = `
+    <span class="widget-chip">${escapeHtml(widgets[activeWidgetType].name)}</span>
+    <span class="widget-chip">${escapeHtml(titleCase(currentConfig.theme))}</span>
+    <span class="widget-chip">${escapeHtml(titleCase(currentConfig.layout))}</span>
+  `;
+}
+
+function renderWidgetInto(target, widgetType, config) {
+  if (liveTimer) {
+    window.clearInterval(liveTimer);
+    liveTimer = null;
+  }
+
+  applyTheme(config);
+  const widget = document.createElement("section");
+  widget.className = "platform-widget";
+  widget.dataset.layout = config.layout;
+  widget.style.setProperty("--accent", config.accent);
+  widget.style.setProperty("--accent-strong", resolveAccentStrong(config.accent));
+
+  if (widgetType === "clock") {
+    renderClockWidget(widget, config);
+  } else if (widgetType === "countdown") {
+    renderCountdownWidget(widget, config);
+  } else if (widgetType === "quote") {
+    renderQuoteWidget(widget, config);
+  } else if (widgetType === "spotify") {
+    renderSpotifyWidget(widget, config);
+  }
+
+  target.innerHTML = "";
+  target.appendChild(widget);
+}
+
+function renderClockWidget(target, config) {
+  const prompts = config.prompts.split("\n").map((item) => item.trim()).filter(Boolean);
+  let promptIndex = 0;
+
+  target.innerHTML = `
+    <div class="platform-widget-header">
+      <div>
+        <p class="widget-eyebrow">${escapeHtml(config.label)}</p>
+        <h2 class="widget-title">${escapeHtml(config.title)}</h2>
+      </div>
+      <span class="widget-chip">Live</span>
+    </div>
+    <p id="clockTime" class="clock-time">00:00</p>
+    <p id="clockMeta" class="clock-meta"></p>
+    <div class="widget-divider"></div>
+    <div class="clock-prompt-card">
+      <p class="widget-eyebrow">Focus prompt</p>
+      <p id="clockPrompt" class="widget-copy">${escapeHtml(prompts[0] || "Add your own prompts in the builder.")}</p>
+    </div>
+    <div class="clock-actions">
+      <button id="clockShuffleButton" class="widget-button" type="button">New prompt</button>
+    </div>
+  `;
+
+  const timeElement = target.querySelector("#clockTime");
+  const metaElement = target.querySelector("#clockMeta");
+  const promptElement = target.querySelector("#clockPrompt");
+  const shuffleButton = target.querySelector("#clockShuffleButton");
+
+  shuffleButton.addEventListener("click", () => {
+    if (prompts.length < 2) {
+      return;
+    }
+
+    promptIndex = (promptIndex + 1) % prompts.length;
+    promptElement.textContent = prompts[promptIndex];
+  });
+
+  const update = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const displayHour = config.use24Hour ? hours : hours % 12 || 12;
+    const period = hours >= 12 ? "PM" : "AM";
+    const parts = [pad(displayHour), pad(now.getMinutes())];
+
+    if (config.showSeconds) {
+      parts.push(pad(now.getSeconds()));
+    }
+
+    timeElement.textContent = parts.join(":") + (config.use24Hour ? "" : ` ${period}`);
+    metaElement.textContent = config.showDate
+      ? now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })
+      : "Your time zone, live in Notion.";
+  };
+
+  update();
+  liveTimer = window.setInterval(update, 1000);
+}
+
+function renderCountdownWidget(target, config) {
+  target.innerHTML = `
+    <div class="platform-widget-header">
+      <div>
+        <p class="countdown-label">${escapeHtml(config.label)}</p>
+        <h2 class="countdown-title">${escapeHtml(config.title)}</h2>
+      </div>
+      <span class="widget-chip">Deadline</span>
+    </div>
+    <p id="countdownMeta" class="countdown-meta"></p>
+    <div class="countdown-grid">
+      <div class="countdown-unit"><span id="daysValue" class="countdown-value">0</span><span class="countdown-unit-label">Days</span></div>
+      <div class="countdown-unit"><span id="hoursValue" class="countdown-value">0</span><span class="countdown-unit-label">Hours</span></div>
+      <div class="countdown-unit"><span id="minutesValue" class="countdown-value">0</span><span class="countdown-unit-label">Minutes</span></div>
+      <div class="countdown-unit"><span id="secondsValue" class="countdown-value">0</span><span class="countdown-unit-label">Seconds</span></div>
+    </div>
+  `;
+
+  const metaElement = target.querySelector("#countdownMeta");
+  const daysValue = target.querySelector("#daysValue");
+  const hoursValue = target.querySelector("#hoursValue");
+  const minutesValue = target.querySelector("#minutesValue");
+  const secondsValue = target.querySelector("#secondsValue");
+
+  const update = () => {
+    const now = Date.now();
+    const targetDate = new Date(config.targetDate).getTime();
+    const difference = targetDate - now;
+
+    if (difference <= 0) {
+      daysValue.textContent = "0";
+      hoursValue.textContent = "0";
+      minutesValue.textContent = "0";
+      secondsValue.textContent = "0";
+      metaElement.textContent = config.completionText;
+      return;
+    }
+
+    const totalSeconds = Math.floor(difference / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    daysValue.textContent = String(days);
+    hoursValue.textContent = pad(hours);
+    minutesValue.textContent = pad(minutes);
+    secondsValue.textContent = config.showSeconds ? pad(seconds) : "--";
+    metaElement.textContent = `Target: ${new Date(config.targetDate).toLocaleString()}`;
+  };
+
+  update();
+  liveTimer = window.setInterval(update, 1000);
+}
+
+function renderQuoteWidget(target, config) {
+  target.innerHTML = `
+    <div class="platform-widget-header">
+      <div>
+        <p class="quote-label">${escapeHtml(config.label)}</p>
+      </div>
+      <span class="widget-chip">Quote</span>
+    </div>
+    <div class="quote-card">
+      <p class="quote-text">${escapeHtml(config.quote)}</p>
+      <p class="quote-author">${escapeHtml(config.author)}</p>
+    </div>
+  `;
+}
+
+function renderSpotifyWidget(target, config) {
+  const embedUrl = normalizeSpotifyEmbedUrl(config.spotifyUrl);
+
+  if (!embedUrl) {
+    target.innerHTML = `
+      <div class="spotify-card-shell">
+        <p class="widget-eyebrow">${escapeHtml(config.label)}</p>
+        <h2 class="spotify-title">${escapeHtml(config.title)}</h2>
+        <p class="spotify-subtitle">Paste a Spotify track, album, playlist, or podcast share link.</p>
+      </div>
+    `;
+    return;
+  }
+
+  target.innerHTML = `
+    <div class="platform-widget-header">
+      <div>
+        <p class="widget-eyebrow">${escapeHtml(config.label)}</p>
+        <h2 class="spotify-title">${escapeHtml(config.title)}</h2>
+      </div>
+      <span class="widget-chip">Spotify</span>
+    </div>
+    <p class="spotify-subtitle">${escapeHtml(config.note)}</p>
+    <div class="widget-divider"></div>
+    <iframe
+      class="spotify-embed"
+      loading="lazy"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      src="${escapeHtml(embedUrl)}"
+    ></iframe>
+  `;
+}
+
+function renderVariations() {
+  variationEmptyState.classList.toggle("is-hidden", savedVariations.length > 0);
+  savedVariationsList.innerHTML = "";
+
+  savedVariations.forEach((variation) => {
+    const card = document.createElement("article");
+    card.className = "saved-widget";
+
+    if (variation.id === activeVariationId) {
+      card.classList.add("is-active");
+    }
+
+    card.innerHTML = `
+      <div class="saved-widget-top">
+        <div>
+          <p class="saved-widget-name">${escapeHtml(variation.name)}</p>
+          <p class="saved-widget-subtext">${escapeHtml(widgets[variation.type].name)} ready for Notion embed.</p>
+        </div>
+        <div class="saved-widget-tags">
+          <span class="saved-widget-tag">${escapeHtml(titleCase(variation.config.theme))}</span>
+          <span class="saved-widget-tag">${escapeHtml(titleCase(variation.config.layout))}</span>
+        </div>
+      </div>
+      <div class="saved-widget-actions">
+        <button class="ghost-button" type="button" data-action="load">Load</button>
+        <button class="secondary-button" type="button" data-action="copy">Copy link</button>
+        <button class="secondary-button" type="button" data-action="delete">Delete</button>
+      </div>
+    `;
+
+    card.addEventListener("click", async (event) => {
+      const action = event.target.dataset.action;
+
+      if (!action) {
+        return;
+      }
+
+      if (action === "load") {
+        loadVariation(variation.id);
+      }
+
+      if (action === "copy") {
+        shareUrlInput.value = buildEmbedUrl(variation.type, variation.config);
+        await copyInputValue(shareUrlInput, copyLinkButton, "Copy embed URL");
+      }
+
+      if (action === "delete") {
+        deleteVariation(variation.id);
+      }
+    });
+
+    savedVariationsList.appendChild(card);
+  });
+}
+
+function buildEmbedUrl(widgetType, config) {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.searchParams.set("mode", "embed");
+  url.searchParams.set("widget", widgetType);
+  url.searchParams.set("config", encodeConfig(config));
+  return url.toString();
+}
+
+function mergeConfig(widgetType, partialConfig) {
   return {
-    eyebrow: params.get("label") || undefined,
-    theme: params.get("theme") || undefined,
-    variant: params.get("variant") || undefined,
-    accent: params.get("accent") || undefined,
-    showSeconds: parseBooleanParam(params.get("seconds")),
-    use24Hour: parseBooleanParam(params.get("twentyFourHour")),
-    showDate: parseBooleanParam(params.get("date")),
-    prompts
+    ...structuredClone(widgets[widgetType].defaults),
+    ...(partialConfig || {})
   };
 }
 
-function parseBooleanParam(value) {
-  if (value === null) {
-    return undefined;
-  }
-
-  return value === "1" || value === "true";
+function applyTheme(config) {
+  const theme = themes[config.theme] || themes.warm;
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty("--page-top", theme.pageTop);
+  rootStyle.setProperty("--page-bottom", theme.pageBottom);
+  rootStyle.setProperty("--panel", theme.panel);
+  rootStyle.setProperty("--panel-strong", theme.panelStrong);
+  rootStyle.setProperty("--panel-border", theme.panelBorder);
+  rootStyle.setProperty("--text-strong", theme.textStrong);
+  rootStyle.setProperty("--text-soft", theme.textSoft);
+  rootStyle.setProperty("--accent", config.accent);
+  rootStyle.setProperty("--accent-strong", theme.accentStrong);
+  rootStyle.setProperty("--widget-card", theme.widgetCard);
+  rootStyle.setProperty("--shadow", theme.shadow);
 }
 
-function mergeSettings(...settingObjects) {
-  const merged = structuredClone(defaultSettings);
-
-  for (const candidate of settingObjects) {
-    if (!candidate) {
-      continue;
-    }
-
-    if (typeof candidate.eyebrow === "string" && candidate.eyebrow.trim()) {
-      merged.eyebrow = candidate.eyebrow.trim();
-    }
-
-    if (typeof candidate.theme === "string" && themeMap[candidate.theme]) {
-      merged.theme = candidate.theme;
-    }
-
-    if (
-      typeof candidate.variant === "string" &&
-      ["classic", "compact", "spotlight"].includes(candidate.variant)
-    ) {
-      merged.variant = candidate.variant;
-    }
-
-    if (typeof candidate.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(candidate.accent)) {
-      merged.accent = candidate.accent;
-    }
-
-    if (typeof candidate.showSeconds === "boolean") {
-      merged.showSeconds = candidate.showSeconds;
-    }
-
-    if (typeof candidate.use24Hour === "boolean") {
-      merged.use24Hour = candidate.use24Hour;
-    }
-
-    if (typeof candidate.showDate === "boolean") {
-      merged.showDate = candidate.showDate;
-    }
-
-    if (Array.isArray(candidate.prompts) && candidate.prompts.length > 0) {
-      merged.prompts = candidate.prompts.map((prompt) => String(prompt).trim()).filter(Boolean);
-    }
-  }
-
-  return merged;
+function resolveAccentStrong(hex) {
+  const value = hex.replace("#", "");
+  const red = parseInt(value.slice(0, 2), 16);
+  const green = parseInt(value.slice(2, 4), 16);
+  const blue = parseInt(value.slice(4, 6), 16);
+  return `rgb(${Math.max(red - 42, 0)} ${Math.max(green - 42, 0)} ${Math.max(blue - 42, 0)})`;
 }
 
-function saveSettings(settings) {
-  window.localStorage.setItem("notion-widget-settings", JSON.stringify(settings));
+function encodeConfig(config) {
+  const json = JSON.stringify(config);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+}
+
+function decodeConfig(encoded) {
+  if (!encoded) {
+    return null;
+  }
+
+  try {
+    const normalized = encoded.replaceAll("-", "+").replaceAll("_", "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const json = new TextDecoder().decode(bytes);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function loadStudioState() {
+  try {
+    const raw = window.localStorage.getItem("notion-widget-studio-state");
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    if (parsed?.type && widgets[parsed.type]) {
+      return {
+        type: parsed.type,
+        config: parsed.config
+      };
+    }
+  } catch {
+    return {
+      type: "clock",
+      config: null
+    };
+  }
+
+  return {
+    type: "clock",
+    config: null
+  };
+}
+
+function loadStudioStateForType(widgetType) {
+  try {
+    const raw = window.localStorage.getItem("notion-widget-studio-state");
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed?.type === widgetType) {
+      return parsed.config;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function saveStudioState(config) {
+  window.localStorage.setItem(
+    "notion-widget-studio-state",
+    JSON.stringify({ type: activeWidgetType, config })
+  );
 }
 
 function loadSavedVariations() {
   try {
-    const rawVariations = window.localStorage.getItem("notion-widget-variations");
-    const parsedVariations = rawVariations ? JSON.parse(rawVariations) : [];
-
-    if (!Array.isArray(parsedVariations)) {
-      return [];
-    }
-
-    return parsedVariations
-      .map((variation) => ({
-        id: typeof variation.id === "string" ? variation.id : createVariationId(),
-        name:
-          typeof variation.name === "string" && variation.name.trim()
-            ? variation.name.trim()
-            : "Untitled variation",
-        settings: mergeSettings(defaultSettings, variation.settings)
-      }))
-      .filter((variation) => Array.isArray(variation.settings.prompts) && variation.settings.prompts.length > 0);
+    const raw = window.localStorage.getItem("notion-widget-variation-library");
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((item) => widgets[item.type]) : [];
   } catch {
     return [];
   }
 }
 
 function persistVariations() {
-  window.localStorage.setItem("notion-widget-variations", JSON.stringify(savedVariations));
+  window.localStorage.setItem("notion-widget-variation-library", JSON.stringify(savedVariations));
 }
 
-function createVariationId() {
-  return `variation-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
-}
+function saveCurrentVariation() {
+  syncConfigFromForm();
 
-function applyTheme(settings) {
-  const rootStyle = document.documentElement.style;
-  const theme = themeMap[settings.theme] || themeMap.warm;
+  const variationName = variationNameInput.value.trim() || `${widgets[activeWidgetType].name} ${savedVariations.length + 1}`;
 
-  rootStyle.setProperty("--bg-top", theme.bgTop);
-  rootStyle.setProperty("--bg-bottom", theme.bgBottom);
-  rootStyle.setProperty("--card", theme.card);
-  rootStyle.setProperty("--panel", theme.panel);
-  rootStyle.setProperty("--card-border", theme.cardBorder);
-  rootStyle.setProperty("--text-strong", theme.textStrong);
-  rootStyle.setProperty("--text-soft", theme.textSoft);
-  rootStyle.setProperty("--accent", settings.accent);
-  rootStyle.setProperty("--accent-deep", theme.accentDeep);
-  rootStyle.setProperty("--shadow", theme.shadow);
-}
-
-function renderSettings(settings) {
-  eyebrowElement.textContent = settings.eyebrow;
-  dateTextElement.classList.toggle("is-hidden", !settings.showDate);
-  periodElement.classList.toggle("is-hidden", settings.use24Hour);
-  widgetCardElement.dataset.variant = settings.variant;
-
-  if (settings.prompts.length > 0) {
-    currentPromptIndex %= settings.prompts.length;
-    focusTextElement.textContent = settings.prompts[currentPromptIndex];
+  if (activeVariationId) {
+    savedVariations = savedVariations.map((variation) =>
+      variation.id === activeVariationId
+        ? { ...variation, name: variationName, type: activeWidgetType, config: structuredClone(currentConfig) }
+        : variation
+    );
+  } else {
+    activeVariationId = createId();
+    savedVariations.unshift({
+      id: activeVariationId,
+      name: variationName,
+      type: activeWidgetType,
+      config: structuredClone(currentConfig)
+    });
   }
 
-  eyebrowInput.value = settings.eyebrow;
-  themeSelect.value = settings.theme;
-  variantSelect.value = settings.variant;
-  accentInput.value = settings.accent;
-  showSecondsInput.checked = settings.showSeconds;
-  use24HourInput.checked = settings.use24Hour;
-  showDateInput.checked = settings.showDate;
-  promptsInput.value = settings.prompts.join("\n");
-  shareUrlInput.value = buildShareUrl(settings);
-  saveVariationButton.textContent = activeVariationId ? "Update variation" : "Save variation";
-
-  applyTheme(settings);
-  updateClock();
+  variationNameInput.value = variationName;
+  persistVariations();
+  renderStudio();
 }
 
-function buildShareUrl(settings) {
-  const shareUrl = new URL(window.location.href);
-  shareUrl.search = "";
+function loadVariation(variationId) {
+  const variation = savedVariations.find((item) => item.id === variationId);
 
-  shareUrl.searchParams.set("label", settings.eyebrow);
-  shareUrl.searchParams.set("theme", settings.theme);
-  shareUrl.searchParams.set("variant", settings.variant);
-  shareUrl.searchParams.set("accent", settings.accent);
-  shareUrl.searchParams.set("seconds", String(settings.showSeconds));
-  shareUrl.searchParams.set("twentyFourHour", String(settings.use24Hour));
-  shareUrl.searchParams.set("date", String(settings.showDate));
-  shareUrl.searchParams.set("prompts", settings.prompts.join("|"));
-
-  return shareUrl.toString();
-}
-
-function updateClock() {
-  const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const seconds = now.getSeconds();
-  const isAfternoon = hours >= 12;
-  const displayHour = currentSettings.use24Hour ? hours : hours % 12 || 12;
-  const timeParts = [padTime(displayHour), padTime(minutes)];
-
-  if (currentSettings.showSeconds) {
-    timeParts.push(padTime(seconds));
-  }
-
-  clockElement.textContent = timeParts.join(":");
-  periodElement.textContent = isAfternoon ? "PM" : "AM";
-
-  dateTextElement.textContent = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric"
-  });
-
-  todayLabelElement.textContent = now.toLocaleDateString(undefined, {
-    weekday: "long"
-  });
-}
-
-function shufflePrompt() {
-  if (currentSettings.prompts.length < 2) {
+  if (!variation) {
     return;
   }
 
-  let nextIndex = currentPromptIndex;
+  activeVariationId = variation.id;
+  activeWidgetType = variation.type;
+  currentConfig = mergeConfig(activeWidgetType, variation.config);
+  variationNameInput.value = variation.name;
+  saveStudioState(currentConfig);
+  renderStudio();
+}
 
-  while (nextIndex === currentPromptIndex) {
-    nextIndex = Math.floor(Math.random() * currentSettings.prompts.length);
+function deleteVariation(variationId) {
+  savedVariations = savedVariations.filter((item) => item.id !== variationId);
+
+  if (activeVariationId === variationId) {
+    activeVariationId = null;
+    variationNameInput.value = "";
   }
 
-  currentPromptIndex = nextIndex;
-  focusTextElement.textContent = currentSettings.prompts[currentPromptIndex];
+  persistVariations();
+  renderStudio();
 }
 
-function readFormSettings() {
-  return mergeSettings(currentSettings, {
-    eyebrow: eyebrowInput.value,
-    theme: themeSelect.value,
-    variant: variantSelect.value,
-    accent: accentInput.value,
-    showSeconds: showSecondsInput.checked,
-    use24Hour: use24HourInput.checked,
-    showDate: showDateInput.checked,
-    prompts: promptsInput.value
-      .split("\n")
-      .map((prompt) => prompt.trim())
-      .filter(Boolean)
-  });
-}
+function syncConfigFromForm() {
+  const widget = widgets[activeWidgetType];
+  const nextConfig = structuredClone(currentConfig);
 
-function toggleSettings(forceOpen) {
-  const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : settingsPanel.hidden;
-  settingsPanel.hidden = !shouldOpen;
-  toggleSettingsButton.setAttribute("aria-expanded", String(shouldOpen));
-}
+  widget.fields.forEach((field) => {
+    const element = builderFields.querySelector(`[data-field-key="${field.key}"]`);
 
-function renderVariations() {
-  savedVariationsList.innerHTML = "";
-  variationEmptyState.classList.toggle("is-hidden", savedVariations.length > 0);
-
-  for (const variation of savedVariations) {
-    const item = document.createElement("article");
-    item.className = "variation-item";
-    item.dataset.variationId = variation.id;
-
-    if (variation.id === activeVariationId) {
-      item.classList.add("is-selected");
+    if (!element) {
+      return;
     }
 
-    const promptCount = variation.settings.prompts.length;
+    if (field.type === "checkbox") {
+      nextConfig[field.key] = element.checked;
+      return;
+    }
 
-    item.innerHTML = `
-      <div class="variation-item-top">
-        <p class="variation-name">${escapeHtml(variation.name)}</p>
-        <div class="variation-meta">
-          <span class="variation-chip">${escapeHtml(titleCase(variation.settings.theme))}</span>
-          <span class="variation-chip">${escapeHtml(titleCase(variation.settings.variant))}</span>
-          <span class="variation-chip">${promptCount} prompt${promptCount === 1 ? "" : "s"}</span>
-        </div>
-      </div>
-      <div class="variation-item-actions">
-        <button class="ghost-button" type="button" data-action="use">Load</button>
-        <button class="secondary-button" type="button" data-action="copy">Copy link</button>
-        <button class="secondary-button" type="button" data-action="delete">Delete</button>
-      </div>
-    `;
+    nextConfig[field.key] = element.value;
+  });
 
-    savedVariationsList.appendChild(item);
+  currentConfig = mergeConfig(activeWidgetType, nextConfig);
+  saveStudioState(currentConfig);
+}
+
+function normalizeSpotifyEmbedUrl(value) {
+  if (!value) {
+    return "";
   }
+
+  try {
+    const url = new URL(value);
+
+    if (url.hostname.includes("spotify.com")) {
+      const segments = url.pathname.split("/").filter(Boolean);
+
+      if (segments[0] === "embed") {
+        return `https://open.spotify.com${url.pathname}`;
+      }
+
+      if (segments.length >= 2) {
+        return `https://open.spotify.com/embed/${segments[0]}/${segments[1]}?utm_source=generator`;
+      }
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
 }
 
 function escapeHtml(value) {
@@ -400,170 +815,56 @@ function titleCase(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function resetVariationDraft() {
-  activeVariationId = null;
-  variationNameInput.value = "";
-  renderSettings(currentSettings);
-  renderVariations();
+function createId() {
+  return `widget-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 }
 
-function saveCurrentVariation() {
-  currentSettings = readFormSettings();
-  saveSettings(currentSettings);
-  renderSettings(currentSettings);
-
-  const variationName = variationNameInput.value.trim() || `Variation ${savedVariations.length + 1}`;
-
-  if (activeVariationId) {
-    savedVariations = savedVariations.map((variation) =>
-      variation.id === activeVariationId
-        ? {
-            ...variation,
-            name: variationName,
-            settings: structuredClone(currentSettings)
-          }
-        : variation
-    );
-  } else {
-    activeVariationId = createVariationId();
-    savedVariations.unshift({
-      id: activeVariationId,
-      name: variationName,
-      settings: structuredClone(currentSettings)
-    });
-  }
-
-  variationNameInput.value = variationName;
-  persistVariations();
-  renderSettings(currentSettings);
-  renderVariations();
+function pad(value) {
+  return String(value).padStart(2, "0");
 }
 
-async function copyVariationLink(variationId) {
-  const variation = savedVariations.find((item) => item.id === variationId);
-
-  if (!variation) {
-    return;
-  }
-
-  shareUrlInput.value = buildShareUrl(variation.settings);
-  await copyShareUrl();
-}
-
-function loadVariation(variationId) {
-  const variation = savedVariations.find((item) => item.id === variationId);
-
-  if (!variation) {
-    return;
-  }
-
-  activeVariationId = variation.id;
-  currentSettings = mergeSettings(defaultSettings, variation.settings);
-  currentPromptIndex = 0;
-  variationNameInput.value = variation.name;
-  saveSettings(currentSettings);
-  renderSettings(currentSettings);
-  renderVariations();
-}
-
-function deleteVariation(variationId) {
-  const variation = savedVariations.find((item) => item.id === variationId);
-
-  if (!variation) {
-    return;
-  }
-
-  savedVariations = savedVariations.filter((item) => item.id !== variationId);
-
-  if (activeVariationId === variationId) {
-    activeVariationId = null;
-    variationNameInput.value = "";
-  }
-
-  persistVariations();
-  renderSettings(currentSettings);
-  renderVariations();
-}
-
-async function copyShareUrl() {
-  shareUrlInput.select();
+async function copyInputValue(input, button, idleText) {
+  input.select();
 
   try {
-    await navigator.clipboard.writeText(shareUrlInput.value);
-    copyLinkButton.textContent = "Copied";
+    await navigator.clipboard.writeText(input.value);
   } catch {
     document.execCommand("copy");
-    copyLinkButton.textContent = "Copied";
   }
 
+  button.textContent = "Copied";
   window.setTimeout(() => {
-    copyLinkButton.textContent = "Copy embed URL";
+    button.textContent = idleText;
   }, 1200);
 }
 
-settingsForm.addEventListener("submit", (event) => {
+builderForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  currentSettings = readFormSettings();
-  currentPromptIndex = 0;
   activeVariationId = null;
-  variationNameInput.value = "";
-  saveSettings(currentSettings);
-  renderSettings(currentSettings);
-  renderVariations();
+  syncConfigFromForm();
+  renderStudio();
 });
+
+copyLinkButton.addEventListener("click", async () => {
+  syncConfigFromForm();
+  shareUrlInput.value = buildEmbedUrl(activeWidgetType, currentConfig);
+  await copyInputValue(shareUrlInput, copyLinkButton, "Copy embed URL");
+});
+
+saveVariationButton.addEventListener("click", saveCurrentVariation);
 
 resetButton.addEventListener("click", () => {
-  currentSettings = structuredClone(defaultSettings);
-  currentPromptIndex = 0;
   activeVariationId = null;
-  window.localStorage.removeItem("notion-widget-settings");
   variationNameInput.value = "";
-  renderSettings(currentSettings);
-  renderVariations();
+  currentConfig = structuredClone(widgets[activeWidgetType].defaults);
+  saveStudioState(currentConfig);
+  renderStudio();
 });
 
-toggleSettingsButton.addEventListener("click", () => {
-  toggleSettings();
+newVariationButton.addEventListener("click", () => {
+  activeVariationId = null;
+  variationNameInput.value = "";
+  currentConfig = structuredClone(widgets[activeWidgetType].defaults);
+  saveStudioState(currentConfig);
+  renderStudio();
 });
-
-closeSettingsButton.addEventListener("click", () => {
-  toggleSettings(false);
-});
-
-copyLinkButton.addEventListener("click", copyShareUrl);
-shuffleButton.addEventListener("click", shufflePrompt);
-saveVariationButton.addEventListener("click", saveCurrentVariation);
-newVariationButton.addEventListener("click", resetVariationDraft);
-
-savedVariationsList.addEventListener("click", async (event) => {
-  const actionButton = event.target.closest("button[data-action]");
-
-  if (!actionButton) {
-    return;
-  }
-
-  const variationId = actionButton.closest(".variation-item")?.dataset.variationId;
-
-  if (!variationId) {
-    return;
-  }
-
-  if (actionButton.dataset.action === "use") {
-    loadVariation(variationId);
-    return;
-  }
-
-  if (actionButton.dataset.action === "copy") {
-    await copyVariationLink(variationId);
-    return;
-  }
-
-  if (actionButton.dataset.action === "delete") {
-    deleteVariation(variationId);
-  }
-});
-
-renderSettings(currentSettings);
-renderVariations();
-updateClock();
-setInterval(updateClock, 1000);
