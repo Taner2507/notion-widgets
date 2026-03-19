@@ -66,6 +66,53 @@ export default function DashboardShell() {
     window.localStorage.setItem(getSavedWidgetsStorageKey(), JSON.stringify(savedWidgets));
   }, [savedWidgets]);
 
+  useEffect(() => {
+    if (activeWidgetType !== "spotify") {
+      return undefined;
+    }
+
+    if (!config.syncMetadata || !config.spotifyUrl) {
+      return undefined;
+    }
+
+    const abortController = new AbortController();
+
+    async function syncSpotifyMetadata() {
+      try {
+        const response = await fetch(`/api/spotify-meta?url=${encodeURIComponent(config.spotifyUrl)}`, {
+          signal: abortController.signal
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const metadata = await response.json();
+
+        setConfig((currentConfig) => {
+          if (currentConfig.spotifyUrl !== config.spotifyUrl || !currentConfig.syncMetadata) {
+            return currentConfig;
+          }
+
+          return {
+            ...currentConfig,
+            title: metadata.title || currentConfig.title,
+            artist: metadata.author || currentConfig.artist,
+            artworkUrl: metadata.thumbnailUrl || currentConfig.artworkUrl
+          };
+        });
+      } catch {
+        return;
+      }
+    }
+
+    syncSpotifyMetadata();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [activeWidgetType, config.spotifyUrl, config.syncMetadata]);
+
   const embedUrl = useMemo(() => buildEmbedUrl(baseUrl, activeWidgetType, config), [baseUrl, activeWidgetType, config]);
   const summary = useMemo(() => getWidgetSummary(savedWidgets), [savedWidgets]);
 

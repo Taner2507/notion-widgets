@@ -509,44 +509,83 @@ textarea {
   border-radius: 18px;
 }
 
-.spotify-player-shell {
+
+.spotify-minimal-shell {
   display: grid;
-  gap: 18px;
+  gap: 14px;
 }
 
-.spotify-info-card {
+.spotify-minimal-card {
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
-  gap: 18px;
-  padding: 18px 18px 18px 16px;
-  border-radius: 26px;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px;
   border: 1px solid var(--panel-border);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.16));
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.34);
 }
 
-.spotify-info-copy {
+.spotify-minimal-artwork {
+  width: 88px;
+  height: 88px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 28px rgba(20, 20, 20, 0.12);
+}
+
+.spotify-minimal-artwork-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spotify-minimal-copy {
   display: grid;
   gap: 8px;
   align-content: center;
 }
 
-.spotify-artwork-frame,
-.spotify-floating-artwork {
-  display: grid;
-  place-items: center;
-  width: 132px;
-  height: 132px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 18px 40px rgba(20, 20, 20, 0.16);
+.spotify-minimal-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.spotify-artwork-image,
-.spotify-floating-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.spotify-title-minimal {
+  font-size: clamp(22px, 4.4vw, 30px);
+}
+
+.spotify-artist-minimal {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 15px;
+}
+
+.spotify-progress-block-minimal {
+  gap: 6px;
+}
+
+.spotify-actions-minimal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spotify-open-link {
+  padding: 9px 12px;
+  font-size: 12px;
+}
+
+.spotify-minimal-footer {
+  display: grid;
+  gap: 10px;
+  padding: 0 2px;
+}
+
+.spotify-note-minimal {
+  font-size: 13px;
 }
 
 .spotify-artwork-fallback {
@@ -592,59 +631,6 @@ textarea {
   background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, white), var(--accent));
 }
 
-.spotify-control-dock {
-  position: relative;
-  display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
-  gap: 16px;
-  padding: 18px 18px 18px 26px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 22px 46px rgba(19, 20, 22, 0.12);
-}
-
-.spotify-floating-artwork {
-  width: 120px;
-  height: 120px;
-  margin-top: -48px;
-  border: 6px solid rgba(255, 255, 255, 0.88);
-}
-
-.spotify-controls-stack {
-  display: grid;
-  gap: 14px;
-  align-content: center;
-}
-
-.spotify-controls-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-}
-
-.spotify-control-button {
-  display: inline-grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border: 0;
-  border-radius: 50%;
-  color: #cad6e6;
-  background: rgba(229, 237, 248, 0.92);
-  font-size: 24px;
-  font-weight: 800;
-  text-decoration: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.spotify-control-button-primary {
-  width: 64px;
-  height: 64px;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, white));
-}
-
 .spotify-volume-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -661,6 +647,10 @@ textarea {
   color: var(--text-soft);
 }
 
+.spotify-volume-row-minimal {
+  gap: 10px;
+}
+
 .spotify-volume-slider {
   width: 100%;
   appearance: none;
@@ -673,6 +663,10 @@ textarea {
     rgba(216, 224, 235, 0.92) calc(var(--slider-fill, 74) * 1%),
     rgba(216, 224, 235, 0.92) 100%
   );
+}
+
+.spotify-volume-slider-minimal {
+  height: 5px;
 }
 
 .spotify-volume-slider::-webkit-slider-thumb {
@@ -759,17 +753,11 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .spotify-info-card,
-  .spotify-control-dock {
+  .spotify-minimal-card {
     grid-template-columns: 1fr;
   }
 
-  .spotify-artwork-frame,
-  .spotify-floating-artwork {
+  .spotify-minimal-artwork {
     margin-inline: auto;
-  }
-
-  .spotify-floating-artwork {
-    margin-top: -28px;
   }
 }

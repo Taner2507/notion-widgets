@@ -164,20 +164,23 @@ function SpotifyWidget({ config, embedMode }) {
 
   return (
     <>
-      <div className="spotify-player-shell">
-        <div className="spotify-info-card">
-          <div className="spotify-artwork-frame">
+      <div className="spotify-minimal-shell">
+        <div className="spotify-minimal-card">
+          <div className="spotify-minimal-artwork">
             {artworkUrl ? (
-              <img className="spotify-artwork-image" src={artworkUrl} alt={`${config.title} cover art`} />
+              <img className="spotify-minimal-artwork-image" src={artworkUrl} alt={`${config.title} cover art`} />
             ) : (
               <div className="spotify-artwork-fallback">♫</div>
             )}
           </div>
-          <div className="spotify-info-copy">
-            <p className="spotify-eyebrow">{config.label}</p>
-            <h2 className="spotify-title">{config.title}</h2>
-            <p className="widget-meta">{config.artist}</p>
-            <div className="spotify-progress-block">
+          <div className="spotify-minimal-copy">
+            <div className="spotify-minimal-topline">
+              <p className="spotify-eyebrow">{config.label}</p>
+              <span className="tag">Spotify</span>
+            </div>
+            <h2 className="spotify-title spotify-title-minimal">{config.title}</h2>
+            <p className="spotify-artist-minimal">{config.artist}</p>
+            <div className="spotify-progress-block spotify-progress-block-minimal">
               <div className="spotify-time-row">
                 <span>{config.elapsedLabel}</span>
                 <span>{config.durationLabel}</span>
@@ -186,58 +189,38 @@ function SpotifyWidget({ config, embedMode }) {
                 <span className="spotify-progress-fill" style={{ width: `${progressPercent}%` }} />
               </div>
             </div>
-          </div>
-        </div>
-        <div className="spotify-control-dock">
-          <div className="spotify-floating-artwork">
-            {artworkUrl ? (
-              <img className="spotify-floating-image" src={artworkUrl} alt="" />
-            ) : (
-              <div className="spotify-artwork-fallback spotify-floating-fallback">♫</div>
-            )}
-          </div>
-          <div className="spotify-controls-stack">
-            <div className="spotify-controls-row">
-              <button className="spotify-control-button" type="button" aria-label="Previous track">
-                &#9198;
-              </button>
+            <div className="spotify-actions-minimal">
               {embedUrl ? (
                 <a
-                  className="spotify-control-button spotify-control-button-primary"
+                  className="secondary-button spotify-open-link"
                   href={config.spotifyUrl}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label="Open in Spotify"
                 >
-                  &#9654;
+                  Open in Spotify
                 </a>
-              ) : (
-                <button className="spotify-control-button spotify-control-button-primary" type="button" aria-label="Play">
-                  &#9654;
-                </button>
-              )}
-              <button className="spotify-control-button" type="button" aria-label="Next track">
-                &#9197;
-              </button>
-            </div>
-            <div className="spotify-volume-row">
-              <span className="spotify-volume-label">Vol</span>
-              <input
-                className="spotify-volume-slider"
-                style={{ "--slider-fill": displayVolume }}
-                type="range"
-                min="0"
-                max="100"
-                value={displayVolume}
-                onChange={(event) => setDisplayVolume(Number(event.target.value))}
-                aria-label="Volume preview"
-              />
-              <span className="spotify-volume-value">{displayVolume}</span>
+              ) : null}
             </div>
           </div>
         </div>
+        <div className="spotify-minimal-footer">
+          <p className="widget-meta spotify-note-minimal">{config.note}</p>
+          <div className="spotify-volume-row spotify-volume-row-minimal">
+            <span className="spotify-volume-label">Volume</span>
+            <input
+              className="spotify-volume-slider spotify-volume-slider-minimal"
+              style={{ "--slider-fill": displayVolume }}
+              type="range"
+              min="0"
+              max="100"
+              value={displayVolume}
+              onChange={(event) => setDisplayVolume(Number(event.target.value))}
+              aria-label="Volume preview"
+            />
+            <span className="spotify-volume-value">{displayVolume}</span>
+          </div>
+        </div>
       </div>
-      <p className="widget-meta">{config.note}</p>
       {config.showNativePlayer && embedUrl ? (
         <>
           <div className="widget-divider"></div>
@@ -259,8 +242,8 @@ function SpotifyWidget({ config, embedMode }) {
       ) : null}
       {!embedMode ? (
         <p className="widget-meta">
-          This shell is fully customizable. Spotify does not expose iframe volume controls to our code,
-          so the custom volume slider styles the card experience rather than changing Spotify playback volume.
+          This widget can auto-match title, artist, and artwork from the pasted Spotify link. True
+          account-level "currently playing" live sync still requires Spotify OAuth and a backend.
         </p>
       ) : null}
     </>
