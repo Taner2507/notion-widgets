@@ -1,32 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notion Widget Starter</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <main class="widget-shell">
-    <section class="widget-card" aria-label="Daily focus widget">
-      <p class="eyebrow">Notion Embed Widget</p>
-      <h1 id="todayLabel" class="title">Today</h1>
-      <div class="time-row">
-        <span id="clock" class="clock">00:00</span>
-        <span id="period" class="period">AM</span>
-      </div>
-      <p id="dateText" class="date-text">Thursday, March 19</p>
-      <div class="divider"></div>
-      <div class="focus-panel">
-        <p class="focus-label">Focus Prompt</p>
-        <p id="focusText" class="focus-text">Pick one meaningful task and finish it before opening anything new.</p>
-      </div>
-      <button id="shuffleButton" class="shuffle-button" type="button">New prompt</button>
-    </section>
-  </main>
-  <script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notion Widget Starter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="widget-shell">
+      <section class="widget-card" aria-label="Daily focus widget">
+        <div class="card-topbar">
+          <p id="eyebrow" class="eyebrow">Notion Embed Widget</p>
+          <button
+            id="toggleSettingsButton"
+            class="ghost-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="settingsPanel"
+          >
+            Customize
+          </button>
+        </div>
+        <h1 id="todayLabel" class="title">Today</h1>
+        <div class="time-row">
+          <span id="clock" class="clock">00:00</span>
+          <span id="period" class="period">AM</span>
+        </div>
+        <p id="dateText" class="date-text">Thursday, March 19</p>
+        <div class="divider"></div>
+        <div class="focus-panel">
+          <p class="focus-label">Focus Prompt</p>
+          <p id="focusText" class="focus-text">
+            Pick one meaningful task and finish it before opening anything new.
+          </p>
+        </div>
+        <button id="shuffleButton" class="shuffle-button" type="button">
+          New prompt
+        </button>
+      </section>
+      <section
+        id="settingsPanel"
+        class="settings-panel"
+        aria-label="Widget customization"
+        hidden
+      >
+        <div class="settings-header">
+          <div>
+            <p class="settings-kicker">Customization</p>
+            <h2 class="settings-title">Tune this widget for your page</h2>
+          </div>
+          <button id="closeSettingsButton" class="ghost-button" type="button">
+            Close
+          </button>
+        </div>
+        <form id="settingsForm" class="settings-form">
+          <label class="field">
+            <span class="field-label">Top label</span>
+            <input id="eyebrowInput" class="field-input" type="text" maxlength="40" />
+          </label>
+          <label class="field">
+            <span class="field-label">Theme</span>
+            <select id="themeSelect" class="field-input">
+              <option value="warm">Warm Paper</option>
+              <option value="ocean">Soft Ocean</option>
+              <option value="forest">Forest Glass</option>
+              <option value="midnight">Midnight</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Accent color</span>
+            <input id="accentInput" class="field-input color-input" type="color" />
+          </label>
+          <label class="field checkbox-field">
+            <input id="showSecondsInput" type="checkbox" />
+            <span>Show seconds</span>
+          </label>
+          <label class="field checkbox-field">
+            <input id="use24HourInput" type="checkbox" />
+            <span>Use 24-hour time</span>
+          </label>
+          <label class="field checkbox-field">
+            <input id="showDateInput" type="checkbox" />
+            <span>Show date line</span>
+          </label>
+          <label class="field">
+            <span class="field-label">Prompts</span>
+            <textarea
+              id="promptsInput"
+              class="field-input field-textarea"
+              rows="6"
+              placeholder="One prompt per line"
+            ></textarea>
+          </label>
+          <div class="settings-actions">
+            <button class="shuffle-button settings-submit" type="submit">Apply settings</button>
+            <button id="resetButton" class="secondary-button" type="button">Reset</button>
+          </div>
+          <label class="field">
+            <span class="field-label">Shareable embed URL</span>
+            <input id="shareUrlInput" class="field-input" type="text" readonly />
+          </label>
+          <button id="copyLinkButton" class="secondary-button" type="button">
+            Copy embed URL
+          </button>
+        </form>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
 </html>

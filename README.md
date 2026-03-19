@@ -1,12 +1,23 @@
 # Notion Widget Starter
 
-This project is a simple embeddable widget you can host publicly and place inside Notion using `/embed`.
+This project is a customizable embeddable widget you can host publicly and place inside Notion using `/embed`.
 
 ## What this project includes
 
 - `index.html`: the widget markup
-- `styles.css`: styling for the widget card
-- `script.js`: live clock and rotating focus prompts
+- `styles.css`: styling for the widget card and settings panel
+- `script.js`: live clock, themes, saved settings, and shareable embed URLs
+
+## Customization features
+
+- Built-in settings panel
+- Theme presets
+- Accent color picker
+- 12-hour or 24-hour time
+- Optional seconds display
+- Optional date line
+- Custom prompt list
+- Shareable URL parameters for reuse in multiple Notion pages
 
 ## Fastest hosting option: GitHub Pages
 
@@ -30,16 +41,26 @@ This project is a simple embeddable widget you can host publicly and place insid
 3. Paste the URL.
 4. Resize the embed block until it fits the widget well.
 
+## Reuse the widget with different configurations
+
+After you customize the widget, use the `Copy embed URL` button. That generated URL includes the current settings as query parameters.
+
+Example:
+
+`https://your-username.github.io/your-repo-name/?label=Deep%20Work&theme=ocean&seconds=true`
+
+That lets you create multiple versions of the same widget for different Notion pages.
+
 ## Local preview
 
 You can open `index.html` directly in a browser for a quick preview.
 
 ## Customization ideas
 
-- Replace the focus prompts in `script.js`
-- Turn it into a countdown widget
-- Connect it to a weather API
-- Build a habit tracker or Pomodoro timer
+- Add a countdown mode
+- Add a Pomodoro mode
+- Connect to a weather API
+- Build a habit tracker or KPI card set
 
 ## Important note
 
