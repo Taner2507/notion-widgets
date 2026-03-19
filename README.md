@@ -12,11 +12,13 @@ This project is a customizable embeddable widget you can host publicly and place
 
 - Built-in settings panel
 - Theme presets
+- Multiple layout variants
 - Accent color picker
 - 12-hour or 24-hour time
 - Optional seconds display
 - Optional date line
 - Custom prompt list
+- Saved named variations
 - Shareable URL parameters for reuse in multiple Notion pages
 
 ## Fastest hosting option: GitHub Pages
@@ -50,6 +52,8 @@ Example:
 `https://your-username.github.io/your-repo-name/?label=Deep%20Work&theme=ocean&seconds=true`
 
 That lets you create multiple versions of the same widget for different Notion pages.
+
+You can also save named variations inside the customization panel. Each saved variation has its own `Copy link` button, which is the closest static-site workflow to how Indify generates separate widget URLs.
 
 ## Local preview
 

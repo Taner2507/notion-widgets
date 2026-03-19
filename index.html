@@ -14,7 +14,7 @@
   </head>
   <body>
     <main class="widget-shell">
-      <section class="widget-card" aria-label="Daily focus widget">
+      <section id="widgetCard" class="widget-card" aria-label="Daily focus widget">
         <div class="card-topbar">
           <p id="eyebrow" class="eyebrow">Notion Embed Widget</p>
           <button
@@ -74,6 +74,14 @@
             </select>
           </label>
           <label class="field">
+            <span class="field-label">Layout style</span>
+            <select id="variantSelect" class="field-input">
+              <option value="classic">Classic Card</option>
+              <option value="compact">Compact Stack</option>
+              <option value="spotlight">Spotlight</option>
+            </select>
+          </label>
+          <label class="field">
             <span class="field-label">Accent color</span>
             <input id="accentInput" class="field-input color-input" type="color" />
           </label>
@@ -109,6 +117,36 @@
           <button id="copyLinkButton" class="secondary-button" type="button">
             Copy embed URL
           </button>
+          <div class="variation-builder">
+            <div class="variation-builder-header">
+              <div>
+                <p class="field-label">Saved variations</p>
+                <p class="field-help">Create multiple versions and paste each generated link into Notion.</p>
+              </div>
+            </div>
+            <label class="field">
+              <span class="field-label">Variation name</span>
+              <input
+                id="variationNameInput"
+                class="field-input"
+                type="text"
+                maxlength="50"
+                placeholder="Study dashboard"
+              />
+            </label>
+            <div class="variation-actions">
+              <button id="saveVariationButton" class="shuffle-button settings-submit" type="button">
+                Save variation
+              </button>
+              <button id="newVariationButton" class="secondary-button" type="button">
+                New variation
+              </button>
+            </div>
+            <div id="variationEmptyState" class="empty-state">
+              No saved variations yet.
+            </div>
+            <div id="savedVariationsList" class="variation-list"></div>
+          </div>
         </form>
       </section>
     </main>
