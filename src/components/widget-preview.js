@@ -194,6 +194,7 @@ function SpotifyWidget({ config, embedMode }) {
   const playerRef = useRef(null);
   const progressIntervalRef = useRef(null);
   const authPollIntervalRef = useRef(null);
+  const seekDebounceRef = useRef(null);
   const playbackSnapshotRef = useRef({ position: 0, duration: 0, paused: true });
   const shouldAutoPlayRef = useRef(false);
   const lastRequestedSourceRef = useRef("");
@@ -459,6 +460,12 @@ function SpotifyWidget({ config, embedMode }) {
     return () => window.clearInterval(progressIntervalRef.current);
   }, [playing]);
 
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(seekDebounceRef.current);
+    };
+  }, []);
+
   async function ensureSpotifyToken() {
     if (!spotifyToken) {
       throw new Error("No Spotify token");
@@ -682,7 +689,7 @@ function SpotifyWidget({ config, embedMode }) {
     }
   }
 
-  async function seekProgress(nextValue) {
+  function seekProgress(nextValue) {
     setProgress(nextValue);
     const snapshot = playbackSnapshotRef.current;
     if (!spotifyToken || !deviceId || !snapshot.duration) return;
@@ -694,13 +701,16 @@ function SpotifyWidget({ config, embedMode }) {
       position: positionMs
     };
 
-    try {
-      await spotifyRequest(`/me/player/seek?position_ms=${positionMs}&device_id=${encodeURIComponent(deviceId)}`, {
-        method: "PUT"
-      });
-    } catch {
-      setAuthError("Could not seek track.");
-    }
+    window.clearTimeout(seekDebounceRef.current);
+    seekDebounceRef.current = window.setTimeout(async () => {
+      try {
+        await spotifyRequest(`/me/player/seek?position_ms=${positionMs}&device_id=${encodeURIComponent(deviceId)}`, {
+          method: "PUT"
+        });
+      } catch {
+        setAuthError("Could not seek track.");
+      }
+    }, 120);
   }
 
   async function toggleSaveTrack() {
@@ -726,9 +736,11 @@ function SpotifyWidget({ config, embedMode }) {
   const artist = meta?.author || config.artist;
   const artworkUrl = (meta?.thumbnailUrl || config.artworkUrl || "").trim();
   const effectiveVol = muted ? 0 : volume;
-  const showAuthCta = !spotifyToken || !isPlayerConnected;
-  const canUseAdvancedControls = !showAuthCta;
-  const shouldRenderNativePlayer = Boolean(embedUrl) && (config.showNativePlayer || showAuthCta);
+  const isEmbedFallbackMode = embedMode;
+  const showAuthCta = !isEmbedFallbackMode && !spotifyToken;
+  const showPlayerPreparing = !isEmbedFallbackMode && spotifyToken && !isPlayerConnected;
+  const canUseAdvancedControls = !isEmbedFallbackMode && spotifyToken && isPlayerConnected;
+  const shouldRenderNativePlayer = Boolean(embedUrl) && (config.showNativePlayer || isEmbedFallbackMode || !canUseAdvancedControls);
   const connectButtonText = isAuthenticating
     ? "Connecting Spotify..."
     : spotifyToken && !isPlayerConnected
@@ -763,7 +775,7 @@ function SpotifyWidget({ config, embedMode }) {
             <div className="sp-progress">
               <span className="sp-time">{elapsedLabel}</span>
               <div className="sp-slider-wrap">
-                <input className="sp-slider" type="range" min="0" max="100" value={progress} onChange={(e) => seekProgress(Number(e.target.value))} style={{ "--pct": `${progress}%` }} aria-label="Seek" />
+                <input className="sp-slider" type="range" min="0" max="100" value={progress} onInput={(e) => seekProgress(Number(e.currentTarget.value))} style={{ "--pct": `${progress}%` }} aria-label="Seek" />
               </div>
               <span className="sp-time">{durationLabel}</span>
             </div>
@@ -804,7 +816,11 @@ function SpotifyWidget({ config, embedMode }) {
           </button>
         ) : null}
 
-        {showAuthCta ? (
+        {showPlayerPreparing ? (
+          <p className="sp-guest-hint">Preparing your Spotify player. Controls unlock once device sync is ready.</p>
+        ) : null}
+
+        {!canUseAdvancedControls && !isEmbedFallbackMode ? (
           <p className="sp-guest-hint">Guest mode: use the native Spotify player below. Connect only if you want advanced controls.</p>
         ) : null}
 
@@ -831,7 +847,7 @@ function SpotifyWidget({ config, embedMode }) {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M15.54 8.46a5 5 0 010 7.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M19.07 4.93a10 10 0 010 14.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
                 )}
               </button>
-              <input className="sp-slider sp-slider-vol" type="range" min="0" max="100" value={effectiveVol} onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false); }} style={{ "--pct": `${effectiveVol}%` }} aria-label="Volume" />
+              <input className="sp-slider sp-slider-vol" type="range" min="0" max="100" value={effectiveVol} onInput={(e) => { setVolume(Number(e.currentTarget.value)); setMuted(false); }} style={{ "--pct": `${effectiveVol}%` }} aria-label="Volume" />
             </div>
 
             {embedUrl && (
