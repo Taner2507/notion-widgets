@@ -184,6 +184,7 @@ function SpotifyWidget({ config, embedMode }) {
   const [spotifyRefreshToken, setSpotifyRefreshToken] = useState("");
   const [tokenExpiry, setTokenExpiry] = useState(0);
   const [authError, setAuthError] = useState("");
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [deviceId, setDeviceId] = useState("");
   const [sdkReady, setSdkReady] = useState(false);
   const [isPlayerConnected, setIsPlayerConnected] = useState(false);
@@ -194,6 +195,8 @@ function SpotifyWidget({ config, embedMode }) {
   const progressIntervalRef = useRef(null);
   const authPollIntervalRef = useRef(null);
   const playbackSnapshotRef = useRef({ position: 0, duration: 0, paused: true });
+  const shouldAutoPlayRef = useRef(false);
+  const lastRequestedSourceRef = useRef("");
 
   useEffect(() => {
     setVolume(Number(config.volumeLevel) || 70);
@@ -232,9 +235,12 @@ function SpotifyWidget({ config, embedMode }) {
       const code = params.get("code");
       if (!code) return;
 
+      setIsAuthenticating(true);
+
       const verifier = window.localStorage.getItem(SPOTIFY_PKCE_VERIFIER_KEY);
       if (!verifier) {
         setAuthError("Could not complete Spotify sign-in.");
+        setIsAuthenticating(false);
         return;
       }
 
@@ -273,6 +279,7 @@ function SpotifyWidget({ config, embedMode }) {
         setAuthError("Spotify sign-in failed.");
       } finally {
         window.localStorage.removeItem(SPOTIFY_PKCE_VERIFIER_KEY);
+        setIsAuthenticating(false);
       }
     }
 
@@ -366,7 +373,13 @@ function SpotifyWidget({ config, embedMode }) {
     player.addListener("ready", async ({ device_id }) => {
       setDeviceId(device_id);
       setIsPlayerConnected(true);
+      setAuthError("");
       await transferPlaybackToDevice(spotifyToken, device_id);
+
+      if (shouldAutoPlayRef.current) {
+        shouldAutoPlayRef.current = false;
+        await startPlaybackFromConfig(device_id);
+      }
     });
 
     player.addListener("not_ready", () => {
@@ -500,7 +513,18 @@ function SpotifyWidget({ config, embedMode }) {
 
   async function connectSpotify() {
     try {
+      if (isAuthenticating) {
+        return;
+      }
+
       setAuthError("");
+
+      if (spotifyToken) {
+        shouldAutoPlayRef.current = true;
+        setAuthError("Connecting Spotify player...");
+        return;
+      }
+
       const clientId = await resolveSpotifyClientId();
       if (!clientId) {
         setAuthError("Set SPOTIFY_CLIENT_ID in Vercel env vars first.");
@@ -512,6 +536,7 @@ function SpotifyWidget({ config, embedMode }) {
       const verifier = createPkceVerifier();
       const challenge = await createPkceChallenge(verifier);
       const redirectUri = getSpotifyRedirectUri();
+      setIsAuthenticating(true);
 
       window.localStorage.setItem(SPOTIFY_PKCE_VERIFIER_KEY, verifier);
 
@@ -541,38 +566,66 @@ function SpotifyWidget({ config, embedMode }) {
         setSpotifyToken(nextSession.accessToken);
         setSpotifyRefreshToken(nextSession.refreshToken || "");
         setTokenExpiry(nextSession.expiresAt || 0);
+        shouldAutoPlayRef.current = true;
         setAuthError("");
+        setIsAuthenticating(false);
         window.clearInterval(authPollIntervalRef.current);
       }, 1000);
 
       window.setTimeout(() => {
         window.clearInterval(authPollIntervalRef.current);
+        setIsAuthenticating(false);
       }, 120000);
     } catch {
       setAuthError("Could not start Spotify sign-in.");
+      setIsAuthenticating(false);
     }
   }
 
+  async function startPlaybackFromConfig(targetDeviceId = deviceId) {
+    const source = spotifyUrlToUri(config.spotifyUrl);
+    if (!source?.uri || !targetDeviceId) return false;
+
+    const playbackPayload = buildInitialPlaybackPayload(source);
+    const requestPath = `/me/player/play?device_id=${encodeURIComponent(targetDeviceId)}`;
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        await spotifyRequest(requestPath, {
+          method: "PUT",
+          body: JSON.stringify(playbackPayload)
+        });
+        lastRequestedSourceRef.current = source.uri;
+        setAuthError("");
+        return true;
+      } catch {
+        await wait(350 * (attempt + 1));
+      }
+    }
+
+    setAuthError("Playback could not start yet. Try again in a second.");
+    return false;
+  }
+
   async function togglePlayback() {
-    if (!playerRef.current || !spotifyToken) {
+    if (!spotifyToken) {
       await connectSpotify();
       return;
     }
 
-    if (!isPlayerConnected || !deviceId) {
+    if (!playerRef.current || !isPlayerConnected || !deviceId) {
+      shouldAutoPlayRef.current = true;
       setAuthError("Spotify player is still connecting...");
       return;
     }
 
     try {
-      const uriFromUrl = spotifyUrlToUri(config.spotifyUrl);
+      const source = spotifyUrlToUri(config.spotifyUrl);
       const hasTrack = Boolean(currentTrackUri || currentTrackId);
+      const sourceChanged = Boolean(source?.uri) && source.uri !== lastRequestedSourceRef.current;
 
-      if (!hasTrack && uriFromUrl) {
-        await spotifyRequest(`/me/player/play?device_id=${encodeURIComponent(deviceId)}`, {
-          method: "PUT",
-          body: JSON.stringify({ uris: [uriFromUrl] })
-        });
+      if ((!hasTrack && source?.uri) || sourceChanged) {
+        await startPlaybackFromConfig();
         return;
       }
 
@@ -676,6 +729,11 @@ function SpotifyWidget({ config, embedMode }) {
   const showAuthCta = !spotifyToken || !isPlayerConnected;
   const canUseAdvancedControls = !showAuthCta;
   const shouldRenderNativePlayer = Boolean(embedUrl) && (config.showNativePlayer || showAuthCta);
+  const connectButtonText = isAuthenticating
+    ? "Connecting Spotify..."
+    : spotifyToken && !isPlayerConnected
+      ? "Preparing Spotify Player..."
+      : "Connect Spotify For Real Playback";
 
   return (
     <div className={`sp${embedMode ? " sp-embed" : ""}`}>
@@ -741,8 +799,8 @@ function SpotifyWidget({ config, embedMode }) {
         )}
 
         {showAuthCta ? (
-          <button className="sp-auth" type="button" onClick={connectSpotify}>
-            Connect Spotify For Real Playback
+          <button className="sp-auth" type="button" onClick={connectSpotify} disabled={isAuthenticating}>
+            {connectButtonText}
           </button>
         ) : null}
 
@@ -822,18 +880,41 @@ function spotifyUrlToUri(value) {
     if (!parsed.hostname.includes("spotify.com")) return "";
     const parts = parsed.pathname.split("/").filter(Boolean);
 
+    let mediaType = parts[0];
+    let mediaId = parts[1];
+
     if (parts[0] === "embed" && parts.length >= 3) {
-      return `spotify:${parts[1]}:${parts[2]}`;
+      mediaType = parts[1];
+      mediaId = parts[2];
     }
 
-    if (parts.length >= 2) {
-      return `spotify:${parts[0]}:${parts[1]}`;
+    if (mediaType && mediaId) {
+      return {
+        type: mediaType,
+        uri: `spotify:${mediaType}:${mediaId}`
+      };
     }
   } catch {
     return "";
   }
 
   return "";
+}
+
+function buildInitialPlaybackPayload(source) {
+  const contextTypes = new Set(["playlist", "album", "artist", "show"]);
+
+  if (contextTypes.has(source.type)) {
+    return { context_uri: source.uri };
+  }
+
+  return { uris: [source.uri] };
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
 }
 
 function getSpotifyRedirectUri() {
