@@ -153,38 +153,130 @@ function QuoteWidget({ config }) {
 
 function SpotifyWidget({ config, embedMode }) {
   const embedUrl = normalizeSpotifyEmbedUrl(config.spotifyUrl);
+  const [displayVolume, setDisplayVolume] = useState(Number(config.volumeLevel) || 0);
+
+  useEffect(() => {
+    setDisplayVolume(Number(config.volumeLevel) || 0);
+  }, [config.volumeLevel]);
+
+  const progressPercent = clampNumber(config.progressPercent, 0, 100);
+  const artworkUrl = config.artworkUrl?.trim();
 
   return (
     <>
-      <div className="spotify-row">
-        <div>
-          <p className="spotify-eyebrow">{config.label}</p>
-          <h2 className="spotify-title">{config.title}</h2>
+      <div className="spotify-player-shell">
+        <div className="spotify-info-card">
+          <div className="spotify-artwork-frame">
+            {artworkUrl ? (
+              <img className="spotify-artwork-image" src={artworkUrl} alt={`${config.title} cover art`} />
+            ) : (
+              <div className="spotify-artwork-fallback">♫</div>
+            )}
+          </div>
+          <div className="spotify-info-copy">
+            <p className="spotify-eyebrow">{config.label}</p>
+            <h2 className="spotify-title">{config.title}</h2>
+            <p className="widget-meta">{config.artist}</p>
+            <div className="spotify-progress-block">
+              <div className="spotify-time-row">
+                <span>{config.elapsedLabel}</span>
+                <span>{config.durationLabel}</span>
+              </div>
+              <div className="spotify-progress-rail" aria-hidden="true">
+                <span className="spotify-progress-fill" style={{ width: `${progressPercent}%` }} />
+              </div>
+            </div>
+          </div>
         </div>
-        <span className="tag">Spotify</span>
+        <div className="spotify-control-dock">
+          <div className="spotify-floating-artwork">
+            {artworkUrl ? (
+              <img className="spotify-floating-image" src={artworkUrl} alt="" />
+            ) : (
+              <div className="spotify-artwork-fallback spotify-floating-fallback">♫</div>
+            )}
+          </div>
+          <div className="spotify-controls-stack">
+            <div className="spotify-controls-row">
+              <button className="spotify-control-button" type="button" aria-label="Previous track">
+                &#9198;
+              </button>
+              {embedUrl ? (
+                <a
+                  className="spotify-control-button spotify-control-button-primary"
+                  href={config.spotifyUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Open in Spotify"
+                >
+                  &#9654;
+                </a>
+              ) : (
+                <button className="spotify-control-button spotify-control-button-primary" type="button" aria-label="Play">
+                  &#9654;
+                </button>
+              )}
+              <button className="spotify-control-button" type="button" aria-label="Next track">
+                &#9197;
+              </button>
+            </div>
+            <div className="spotify-volume-row">
+              <span className="spotify-volume-label">Vol</span>
+              <input
+                className="spotify-volume-slider"
+                style={{ "--slider-fill": displayVolume }}
+                type="range"
+                min="0"
+                max="100"
+                value={displayVolume}
+                onChange={(event) => setDisplayVolume(Number(event.target.value))}
+                aria-label="Volume preview"
+              />
+              <span className="spotify-volume-value">{displayVolume}</span>
+            </div>
+          </div>
+        </div>
       </div>
       <p className="widget-meta">{config.note}</p>
-      <div className="widget-divider"></div>
-      {embedUrl ? (
-        <iframe
-          className="widget-embed"
-          src={embedUrl}
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
-          title="Spotify embed"
-        />
-      ) : (
+      {config.showNativePlayer && embedUrl ? (
+        <>
+          <div className="widget-divider"></div>
+          <iframe
+            className="widget-embed spotify-native-embed"
+            src={embedUrl}
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            title="Spotify embed"
+          />
+        </>
+      ) : null}
+      {!embedUrl ? (
         <div className="prompt-card">
           <p className="muted-text">
             Paste a Spotify track, album, playlist, or podcast share link in the builder.
           </p>
         </div>
-      )}
-      {!embedMode ? <p className="widget-meta">This one is useful when you want more styling than a raw Spotify paste.</p> : null}
+      ) : null}
+      {!embedMode ? (
+        <p className="widget-meta">
+          This shell is fully customizable. Spotify does not expose iframe volume controls to our code,
+          so the custom volume slider styles the card experience rather than changing Spotify playback volume.
+        </p>
+      ) : null}
     </>
   );
 }
 
 function pad(value) {
   return String(value).padStart(2, "0");
+}
+
+function clampNumber(value, min, max) {
+  const numericValue = Number(value);
+
+  if (Number.isNaN(numericValue)) {
+    return min;
+  }
+
+  return Math.min(Math.max(numericValue, min), max);
 }

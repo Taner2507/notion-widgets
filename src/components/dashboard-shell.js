@@ -302,13 +302,21 @@ export default function DashboardShell() {
                       ))}
                     </select>
                   ) : null}
-                  {["text", "color", "datetime-local", "url"].includes(field.type) ? (
+                  {["text", "color", "datetime-local", "url", "number"].includes(field.type) ? (
                     <input
                       className="field-control"
                       type={field.type}
                       maxLength={field.maxLength}
+                      min={field.min}
+                      max={field.max}
+                      step={field.step}
                       value={config[field.key]}
-                      onChange={(event) => updateField(field.key, event.target.value)}
+                      onChange={(event) =>
+                        updateField(
+                          field.key,
+                          field.type === "number" ? Number(event.target.value || 0) : event.target.value
+                        )
+                      }
                     />
                   ) : null}
                   {field.help ? <p className="field-help">{field.help}</p> : null}

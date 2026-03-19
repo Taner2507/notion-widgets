@@ -133,9 +133,16 @@ export const widgetCatalog = {
     description: "Wrap a Spotify track, album, or playlist in a better shell.",
     defaults: {
       label: "Now Playing",
-      title: "Spotify Pick",
+      title: "Proxy (Original Mix)",
+      artist: "Martin Garrix",
       note: "Paste a Spotify share or embed URL.",
       spotifyUrl: "https://open.spotify.com/track/7ouMYWpwJ422jRcDASZB7P",
+      artworkUrl: "https://i.scdn.co/image/ab67616d0000b27369c65c7b8b0d74f4d7a5f56d",
+      elapsedLabel: "00:05",
+      durationLabel: "04:39",
+      progressPercent: 32,
+      volumeLevel: 74,
+      showNativePlayer: true,
       theme: "midnight",
       layout: "classic",
       accent: "#1db954"
@@ -143,8 +150,15 @@ export const widgetCatalog = {
     fields: [
       { key: "label", label: "Top label", type: "text", maxLength: 40 },
       { key: "title", label: "Title", type: "text", maxLength: 40 },
+      { key: "artist", label: "Artist or subtitle", type: "text", maxLength: 60 },
       { key: "note", label: "Helper text", type: "text", maxLength: 80 },
       { key: "spotifyUrl", label: "Spotify link", type: "url" },
+      { key: "artworkUrl", label: "Artwork image URL", type: "url" },
+      { key: "elapsedLabel", label: "Elapsed time label", type: "text", maxLength: 8 },
+      { key: "durationLabel", label: "Duration label", type: "text", maxLength: 8 },
+      { key: "progressPercent", label: "Progress percent", type: "number", min: 0, max: 100, step: 1 },
+      { key: "volumeLevel", label: "Volume percent", type: "number", min: 0, max: 100, step: 1 },
+      { key: "showNativePlayer", label: "Show native Spotify player", type: "checkbox" },
       { key: "theme", label: "Theme", type: "select", options: themeOptions },
       { key: "layout", label: "Layout", type: "select", options: layoutOptions },
       { key: "accent", label: "Accent color", type: "color" }
