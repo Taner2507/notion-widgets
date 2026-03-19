@@ -1,10 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
+
 import WidgetPreview from "@/src/components/widget-preview";
 import { mergeWidgetConfig, widgetCatalog } from "@/src/lib/widget-definitions";
 import { decodeWidgetConfig } from "@/src/lib/widget-utils";
 
 export default function EmbedShell({ widgetType, encodedConfig }) {
+  useEffect(() => {
+    document.body.classList.add("is-embed");
+    return () => {
+      document.body.classList.remove("is-embed");
+    };
+  }, []);
+
   if (!widgetCatalog[widgetType]) {
     return (
       <main className="embed-page">

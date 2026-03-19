@@ -52,6 +52,12 @@ body {
   background: var(--bg);
 }
 
+body.is-embed {
+  min-height: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -973,6 +979,37 @@ input[type="color"].form-input {
   transform: scale(0.95);
 }
 
+.sp-btn:disabled,
+.sp-slider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sp-auth {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #121212;
+  background: #1db954;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.sp-auth:hover {
+  filter: brightness(1.05);
+}
+
+.sp-error {
+  margin: -4px 0 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: #ff9b9b;
+}
+
 /* ── Bottom row ── */
 .sp-bottom {
   display: flex;
@@ -1052,9 +1089,75 @@ input[type="color"].form-input {
 .embed-page {
   display: grid;
   place-items: center;
-  min-height: 100vh;
-  padding: 12px;
+  min-height: 100dvh;
+  height: 100dvh;
+  padding: 0;
+  width: 100%;
   background: transparent;
+  overflow: hidden;
+}
+
+body.is-embed .widget-card.is-embed {
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+}
+
+body.is-embed .sp.sp-embed {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+body.is-embed .sp.sp-embed .sp-body {
+  height: 100%;
+  gap: clamp(8px, 1.8vh, 14px);
+  padding: clamp(8px, 2.2vh, 16px);
+}
+
+body.is-embed .sp.sp-embed .sp-cover {
+  flex: 1 1 auto;
+  min-height: 92px;
+  max-height: 52%;
+  aspect-ratio: auto;
+}
+
+body.is-embed .sp.sp-embed .sp-cover-img,
+body.is-embed .sp.sp-embed .sp-cover-empty {
+  height: 100%;
+}
+
+@media (max-height: 520px) {
+  body.is-embed .sp.sp-embed .sp-body {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  body.is-embed .sp.sp-embed .sp-cover {
+    max-height: 42%;
+    min-height: 76px;
+  }
+
+  body.is-embed .sp.sp-embed .sp-title {
+    font-size: 13px;
+  }
+
+  body.is-embed .sp.sp-embed .sp-subtitle,
+  body.is-embed .sp.sp-embed .sp-time {
+    font-size: 10px;
+  }
+
+  body.is-embed .sp.sp-embed .sp-controls {
+    gap: 12px;
+  }
+
+  body.is-embed .sp.sp-embed .sp-btn-play {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .embed-error {
