@@ -1,14 +1,17 @@
+import { Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"] });
+
 export const metadata = {
-  title: "Notion Widget Platform",
-  description: "Create polished Notion widgets and generate embed links."
+  title: "Notion Widget Studio",
+  description: "Create beautiful Notion widgets and generate embed links."
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

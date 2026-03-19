@@ -1,20 +1,11 @@
-import { themes, widgetCatalog } from "@/src/lib/widget-definitions";
+import { widgetCatalog } from "@/src/lib/widget-definitions";
 
 export function applyThemeVariables(config) {
-  const theme = themes[config.theme] || themes.warm;
-
   return {
-    "--page-top": theme.pageTop,
-    "--page-bottom": theme.pageBottom,
-    "--panel": theme.panel,
-    "--panel-strong": theme.panelStrong,
-    "--panel-border": theme.panelBorder,
-    "--text-strong": theme.textStrong,
-    "--text-soft": theme.textSoft,
+    "--text-strong": "#eef5ff",
+    "--text-soft": "#afc1d4",
     "--accent": config.accent,
-    "--accent-strong": resolveAccentStrong(config.accent),
-    "--shadow": theme.shadow,
-    "--widget-card": theme.widgetCard
+    "--accent-strong": resolveAccentStrong(config.accent)
   };
 }
 

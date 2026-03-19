@@ -10,7 +10,6 @@ import {
   createSavedWidgetId,
   getSavedWidgetsStorageKey,
   getStudioStateStorageKey,
-  getWidgetSummary,
   titleCase
 } from "@/src/lib/widget-utils";
 
@@ -67,13 +66,8 @@ export default function DashboardShell() {
   }, [savedWidgets]);
 
   useEffect(() => {
-    if (activeWidgetType !== "spotify") {
-      return undefined;
-    }
-
-    if (!config.syncMetadata || !config.spotifyUrl) {
-      return undefined;
-    }
+    if (activeWidgetType !== "spotify") return;
+    if (!config.syncMetadata || !config.spotifyUrl) return;
 
     const abortController = new AbortController();
 
@@ -82,18 +76,13 @@ export default function DashboardShell() {
         const response = await fetch(`/api/spotify-meta?url=${encodeURIComponent(config.spotifyUrl)}`, {
           signal: abortController.signal
         });
-
-        if (!response.ok) {
-          return;
-        }
-
+        if (!response.ok) return;
         const metadata = await response.json();
 
         setConfig((currentConfig) => {
           if (currentConfig.spotifyUrl !== config.spotifyUrl || !currentConfig.syncMetadata) {
             return currentConfig;
           }
-
           return {
             ...currentConfig,
             title: metadata.title || currentConfig.title,
@@ -107,21 +96,13 @@ export default function DashboardShell() {
     }
 
     syncSpotifyMetadata();
-
-    return () => {
-      abortController.abort();
-    };
+    return () => abortController.abort();
   }, [activeWidgetType, config.spotifyUrl, config.syncMetadata]);
 
   const embedUrl = useMemo(() => buildEmbedUrl(baseUrl, activeWidgetType, config), [baseUrl, activeWidgetType, config]);
-  const summary = useMemo(() => getWidgetSummary(savedWidgets), [savedWidgets]);
-
   const activeDefinition = widgetCatalog[activeWidgetType];
 
-  if (!embedRequest.checked) {
-    return null;
-  }
-
+  if (!embedRequest.checked) return null;
   if (embedRequest.enabled) {
     return <EmbedShell widgetType={embedRequest.type} encodedConfig={embedRequest.config} />;
   }
@@ -135,17 +116,11 @@ export default function DashboardShell() {
 
   function updateField(key, nextValue) {
     setActiveSavedId(null);
-    setConfig((currentConfig) => ({
-      ...currentConfig,
-      [key]: nextValue
-    }));
+    setConfig((c) => ({ ...c, [key]: nextValue }));
   }
 
   async function copyEmbedLink(nextUrl = embedUrl) {
-    if (!nextUrl) {
-      return;
-    }
-
+    if (!nextUrl) return;
     try {
       await navigator.clipboard.writeText(nextUrl);
       setCopied(true);
@@ -159,8 +134,8 @@ export default function DashboardShell() {
     const name = draftName.trim() || `${activeDefinition.name} ${savedWidgets.length + 1}`;
 
     if (activeSavedId) {
-      setSavedWidgets((currentWidgets) =>
-        currentWidgets.map((widget) =>
+      setSavedWidgets((w) =>
+        w.map((widget) =>
           widget.id === activeSavedId
             ? { ...widget, name, type: activeWidgetType, config, updatedAt: new Date().toISOString() }
             : widget
@@ -173,15 +148,9 @@ export default function DashboardShell() {
     const newId = createSavedWidgetId();
     setActiveSavedId(newId);
     setDraftName(name);
-    setSavedWidgets((currentWidgets) => [
-      {
-        id: newId,
-        name,
-        type: activeWidgetType,
-        config,
-        updatedAt: new Date().toISOString()
-      },
-      ...currentWidgets
+    setSavedWidgets((w) => [
+      { id: newId, name, type: activeWidgetType, config, updatedAt: new Date().toISOString() },
+      ...w
     ]);
   }
 
@@ -193,8 +162,7 @@ export default function DashboardShell() {
   }
 
   function deleteSavedWidget(id) {
-    setSavedWidgets((currentWidgets) => currentWidgets.filter((widget) => widget.id !== id));
-
+    setSavedWidgets((w) => w.filter((widget) => widget.id !== id));
     if (activeSavedId === id) {
       setActiveSavedId(null);
       setDraftName("");
@@ -209,246 +177,188 @@ export default function DashboardShell() {
   }
 
   return (
-    <main className="page-shell">
-      <header className="topbar glass-panel">
-        <div className="brand">
-          <span className="brand-mark">N</span>
-          <div>
-            <p className="brand-title">Notion Widget Platform</p>
-            <p className="brand-subtitle">Build cleaner widgets and better embed links.</p>
-          </div>
+    <main className="app">
+      {/* ── Header ── */}
+      <header className="app-header">
+        <div className="header-left">
+          <span className="header-logo">N</span>
+          <span className="header-title">Widget Studio</span>
         </div>
-        <div className="nav-links">
-          <a className="chip-button" href="#studio">
-            Studio
-          </a>
-          <a className="chip-button" href="#catalog">
-            Explore
-          </a>
-          <button className="primary-button" type="button" onClick={() => copyEmbedLink()}>
-            {copied ? "Copied" : "Copy Current Embed"}
+        <div className="header-right">
+          <button className="btn btn-ghost" type="button" onClick={resetDraft}>
+            + New
+          </button>
+          <button className="btn btn-primary" type="button" onClick={() => copyEmbedLink()}>
+            {copied ? "Copied!" : "Copy Embed Link"}
           </button>
         </div>
       </header>
 
-      <section className="hero-grid">
-        <section className="hero-panel glass-panel">
-          <p className="section-kicker">A better Notion widget workflow</p>
-          <h1 className="hero-title">Design, save, and ship widget links without paying for a domain first.</h1>
-          <p className="hero-copy">
-            Use a free Vercel URL to launch quickly, then add a custom domain later if you want
-            branding. For now, the important part is a clean builder, a polished preview, and a
-            proper embed route.
-          </p>
-          <div className="hero-actions">
-            <a className="primary-button" href="#studio">
-              Build a widget
-            </a>
-            <button className="secondary-button" type="button" onClick={resetDraft}>
-              New draft
+      <div className="app-body">
+        {/* ── Sidebar: Builder ── */}
+        <aside className="sidebar">
+          <div className="sidebar-section">
+            <p className="sidebar-label">Select Widget</p>
+            <div className="widget-types">
+              {widgetEntries.map((widget) => (
+                <button
+                  key={widget.id}
+                  className={`widget-type-btn${widget.id === activeWidgetType ? " active" : ""}`}
+                  type="button"
+                  onClick={() => selectWidgetType(widget.id)}
+                >
+                  <span className="widget-type-icon">{widget.icon}</span>
+                  <div>
+                    <span className="widget-type-name">{widget.name}</span>
+                    <span className="widget-type-desc">{widget.description}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="sidebar-section">
+            <p className="sidebar-label">Configure</p>
+            <div className="form-fields">
+              <div className="form-group">
+                <label className="form-label">Widget Name</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  maxLength={60}
+                  placeholder="e.g. Morning Dashboard"
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                />
+              </div>
+
+              {activeDefinition.fields.map((field) => {
+                if (field.type === "checkbox") {
+                  return (
+                    <label key={field.key} className="form-group is-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(config[field.key])}
+                        onChange={(e) => updateField(field.key, e.target.checked)}
+                      />
+                      <span className="form-label">{field.label}</span>
+                    </label>
+                  );
+                }
+
+                const options = typeof field.options === "function" ? field.options() : [];
+
+                return (
+                  <div key={field.key} className="form-group">
+                    <label className="form-label">{field.label}</label>
+                    {field.type === "textarea" && (
+                      <textarea
+                        className="form-input"
+                        value={config[field.key]}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                      />
+                    )}
+                    {field.type === "select" && (
+                      <select
+                        className="form-input"
+                        value={config[field.key]}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                      >
+                        {options.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    )}
+                    {["text", "color", "datetime-local", "url", "number"].includes(field.type) && (
+                      <input
+                        className="form-input"
+                        type={field.type}
+                        maxLength={field.maxLength}
+                        min={field.min}
+                        max={field.max}
+                        step={field.step}
+                        value={config[field.key]}
+                        onChange={(e) =>
+                          updateField(
+                            field.key,
+                            field.type === "number" ? Number(e.target.value || 0) : e.target.value
+                          )
+                        }
+                      />
+                    )}
+                    {field.help && <p className="form-hint">{field.help}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="sidebar-actions">
+            <button className="btn btn-primary btn-full" type="button" onClick={saveWidget}>
+              {activeSavedId ? "Update Widget" : "Save Widget"}
+            </button>
+            <button className="btn btn-ghost btn-full" type="button" onClick={resetDraft}>
+              Reset to Defaults
             </button>
           </div>
-        </section>
+        </aside>
 
-        <section className="metrics-panel glass-panel">
-          <p className="section-kicker">Platform snapshot</p>
-          <div className="metrics-grid">
-            <article className="metric-card">
-              <p className="metric-label">Widget types</p>
-              <p className="metric-value">{widgetEntries.length}</p>
-            </article>
-            <article className="metric-card">
-              <p className="metric-label">Saved widgets</p>
-              <p className="metric-value">{summary.total}</p>
-            </article>
-            <article className="metric-card">
-              <p className="metric-label">Hosting cost</p>
-              <p className="metric-value">$0</p>
-            </article>
-          </div>
-          <div className="button-row" style={{ marginTop: 18 }}>
-            <span className="tag">Free `.vercel.app` works in Notion</span>
-            <span className="tag">Custom domain optional later</span>
-          </div>
-        </section>
-      </section>
-
-      <section id="studio" className="two-column-grid">
-        <section className="studio-panel glass-panel">
-          <div className="panel-title-row">
-            <div>
-              <p className="section-kicker">Studio</p>
-              <h2 className="panel-title">Create widget</h2>
-            </div>
-          </div>
-
-          <div className="type-grid">
-            {widgetEntries.map((widget) => (
-              <button
-                key={widget.id}
-                className={`type-card${widget.id === activeWidgetType ? " is-active" : ""}`}
-                type="button"
-                onClick={() => selectWidgetType(widget.id)}
-              >
-                <p className="section-kicker">{widget.id}</p>
-                <p className="type-title">{widget.name}</p>
-                <p className="type-description">{widget.description}</p>
-              </button>
-            ))}
-          </div>
-
-          <div className="field-grid">
-            <label className="field">
-              <span className="field-label">Widget name</span>
-              <input
-                className="field-control"
-                type="text"
-                maxLength={60}
-                placeholder="Morning Dashboard"
-                value={draftName}
-                onChange={(event) => setDraftName(event.target.value)}
-              />
-            </label>
-
-            {activeDefinition.fields.map((field) => {
-              if (field.type === "checkbox") {
-                return (
-                  <label key={field.key} className="field is-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(config[field.key])}
-                      onChange={(event) => updateField(field.key, event.target.checked)}
-                    />
-                    <span className="field-label">{field.label}</span>
-                  </label>
-                );
-              }
-
-              const options = typeof field.options === "function" ? field.options() : [];
-
-              return (
-                <label key={field.key} className="field">
-                  <span className="field-label">{field.label}</span>
-                  {field.type === "textarea" ? (
-                    <textarea
-                      className="field-control"
-                      value={config[field.key]}
-                      onChange={(event) => updateField(field.key, event.target.value)}
-                    />
-                  ) : null}
-                  {field.type === "select" ? (
-                    <select
-                      className="field-control"
-                      value={config[field.key]}
-                      onChange={(event) => updateField(field.key, event.target.value)}
-                    >
-                      {options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : null}
-                  {["text", "color", "datetime-local", "url", "number"].includes(field.type) ? (
-                    <input
-                      className="field-control"
-                      type={field.type}
-                      maxLength={field.maxLength}
-                      min={field.min}
-                      max={field.max}
-                      step={field.step}
-                      value={config[field.key]}
-                      onChange={(event) =>
-                        updateField(
-                          field.key,
-                          field.type === "number" ? Number(event.target.value || 0) : event.target.value
-                        )
-                      }
-                    />
-                  ) : null}
-                  {field.help ? <p className="field-help">{field.help}</p> : null}
-                </label>
-              );
-            })}
-          </div>
-
-          <div className="builder-footer">
-            <label className="field">
-              <span className="field-label">Embed URL</span>
-              <input className="field-control" type="text" readOnly value={embedUrl} />
-            </label>
-            <div className="button-row">
-              <button className="primary-button" type="button" onClick={saveWidget}>
-                {activeSavedId ? "Update widget" : "Save widget"}
-              </button>
-              <button className="secondary-button" type="button" onClick={() => copyEmbedLink()}>
-                Copy embed link
-              </button>
-              <button className="ghost-button" type="button" onClick={resetDraft}>
-                Reset
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section className="saved-panel glass-panel">
-          <div className="panel-title-row">
-            <div>
-              <p className="section-kicker">Preview</p>
-              <h2 className="panel-title">Live output</h2>
-            </div>
-            <div className="preview-chips">
-              <span className="tag">{activeDefinition.name}</span>
-              <span className="tag">{titleCase(config.theme)}</span>
-              <span className="tag">{titleCase(config.layout)}</span>
-            </div>
-          </div>
-
-          <div className="preview-shell">
-            <div className="widget-preview">
-              <WidgetPreview type={activeWidgetType} config={config} />
-            </div>
-
-            <div className="panel-title-row" style={{ marginBottom: 0, marginTop: 10 }}>
-              <div>
-                <p className="section-kicker">My widgets</p>
-                <h2 className="panel-title">Saved variations</h2>
+        {/* ── Content: Preview + Saved ── */}
+        <div className="content">
+          <section className="preview-section">
+            <div className="preview-header">
+              <h2 className="section-title">Live Preview</h2>
+              <div className="preview-badges">
+                <span className="badge">{activeDefinition.name}</span>
+                <span className="badge">{titleCase(config.layout)}</span>
               </div>
             </div>
 
+            <div className="preview-canvas">
+              <WidgetPreview type={activeWidgetType} config={config} />
+            </div>
+
+            <div className="embed-bar">
+              <label className="form-label">Embed URL</label>
+              <div className="embed-input-row">
+                <input className="form-input embed-input" type="text" readOnly value={embedUrl} />
+                <button className="btn btn-primary" type="button" onClick={() => copyEmbedLink()}>
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <p className="embed-hint">Paste this URL into a Notion embed block to display the widget.</p>
+            </div>
+          </section>
+
+          <section className="saved-section">
+            <h2 className="section-title">Saved Widgets</h2>
             {savedWidgets.length === 0 ? (
-              <div className="empty-state">No saved widgets yet. Save one and it will appear here.</div>
+              <div className="empty-state">
+                No saved widgets yet. Configure a widget and click "Save Widget" to get started.
+              </div>
             ) : (
               <div className="saved-grid">
-                {savedWidgets.map((savedWidget) => (
-                  <article
-                    key={savedWidget.id}
-                    className={`saved-card${savedWidget.id === activeSavedId ? " is-active" : ""}`}
-                  >
-                    <div className="saved-top">
-                      <div>
-                        <p className="saved-title">{savedWidget.name}</p>
-                        <p className="saved-subtext">
-                          {widgetCatalog[savedWidget.type].name} • updated {new Date(savedWidget.updatedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="saved-tags">
-                        <span className="tag">{titleCase(savedWidget.config.theme)}</span>
-                        <span className="tag">{titleCase(savedWidget.config.layout)}</span>
-                      </div>
+                {savedWidgets.map((sw) => (
+                  <article key={sw.id} className={`saved-card${sw.id === activeSavedId ? " active" : ""}`}>
+                    <div className="saved-card-header">
+                      <h3 className="saved-card-name">{sw.name}</h3>
+                      <span className="badge">{widgetCatalog[sw.type].name}</span>
                     </div>
-                    <div className="saved-actions">
-                      <button className="ghost-button" type="button" onClick={() => loadSavedWidget(savedWidget)}>
+                    <p className="saved-card-meta">
+                      Updated {new Date(sw.updatedAt).toLocaleDateString()}
+                    </p>
+                    <div className="saved-card-actions">
+                      <button className="btn btn-sm btn-ghost" type="button" onClick={() => loadSavedWidget(sw)}>
                         Load
                       </button>
                       <button
-                        className="secondary-button"
+                        className="btn btn-sm btn-ghost"
                         type="button"
-                        onClick={() => copyEmbedLink(buildEmbedUrl(baseUrl, savedWidget.type, savedWidget.config))}
+                        onClick={() => copyEmbedLink(buildEmbedUrl(baseUrl, sw.type, sw.config))}
                       >
-                        Copy link
+                        Copy Link
                       </button>
-                      <button className="secondary-button" type="button" onClick={() => deleteSavedWidget(savedWidget.id)}>
+                      <button className="btn btn-sm btn-danger" type="button" onClick={() => deleteSavedWidget(sw.id)}>
                         Delete
                       </button>
                     </div>
@@ -456,35 +366,9 @@ export default function DashboardShell() {
                 ))}
               </div>
             )}
-          </div>
-        </section>
-      </section>
-
-      <section id="catalog" className="catalog-panel glass-panel">
-        <div className="panel-title-row">
-          <div>
-            <p className="section-kicker">Explore widgets</p>
-            <h2 className="panel-title">High-value starting set</h2>
-          </div>
-          <div className="catalog-tags">
-            <span className="tag">Built for Notion width constraints</span>
-            <span className="tag">Free hosting friendly</span>
-          </div>
+          </section>
         </div>
-        <div className="catalog-grid">
-          {widgetEntries.map((widget) => (
-            <article key={widget.id} className="catalog-card">
-              <span className="catalog-icon">{widget.icon}</span>
-              <h3 className="catalog-title">{widget.name}</h3>
-              <p className="muted-text">{widget.description}</p>
-              <div className="catalog-tags" style={{ marginTop: 16 }}>
-                <span className="tag">Fast to configure</span>
-                <span className="tag">Embed-ready</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      </div>
     </main>
   );
 }
