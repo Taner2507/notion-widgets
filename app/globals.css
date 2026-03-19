@@ -528,8 +528,9 @@ input[type="color"].form-input {
   width: min(100%, 420px);
   padding: 0;
   border: none;
-  border-radius: 20px;
+  border-radius: 12px;
   background: transparent;
+  overflow: hidden;
 }
 
 .widget-card[data-layout="compact"] {
@@ -724,7 +725,7 @@ input[type="color"].form-input {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: inherit;
   background: #181818;
   color: #fff;
 }
@@ -979,6 +980,10 @@ input[type="color"].form-input {
   transform: scale(0.95);
 }
 
+.sp-btn-play-connect {
+  margin: 0 auto;
+}
+
 .sp-btn:disabled,
 .sp-slider:disabled {
   opacity: 0.45;
@@ -1008,6 +1013,13 @@ input[type="color"].form-input {
   font-size: 10px;
   line-height: 1.35;
   color: #ff9b9b;
+}
+
+.sp-guest-hint {
+  margin: -4px 0 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: #a7a7a7;
 }
 
 /* ── Bottom row ── */
