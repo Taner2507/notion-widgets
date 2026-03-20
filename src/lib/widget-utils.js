@@ -96,8 +96,9 @@ export function buildEmbedUrl(baseUrl, type, config) {
   if (!baseUrl) {
     return "";
   }
-
-  return `${baseUrl}?embed=1&widget=${type}&config=${encodeWidgetConfig(config)}`;
+  const url = new URL(`/embed/${type}`, baseUrl);
+  url.searchParams.set("config", encodeWidgetConfig(config));
+  return url.toString();
 }
 
 export function createSavedWidgetId() {

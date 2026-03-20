@@ -30,7 +30,7 @@ export default function DashboardShell() {
     const encodedConfig = currentUrl.searchParams.get("config");
     const embedEnabled = currentUrl.searchParams.get("embed") === "1";
 
-    setBaseUrl(`${currentUrl.origin}${currentUrl.pathname}`);
+    setBaseUrl(currentUrl.origin);
     setEmbedRequest({
       checked: true,
       enabled: embedEnabled,

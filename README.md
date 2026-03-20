@@ -55,6 +55,8 @@ The dashboard generates links like:
 
 That route renders only the widget, which makes it suitable for Notion embeds.
 
+In Notion, use a real `/embed` block (not a bookmark block) and paste the copied link.
+
 ## Spotify in Notion
 
 People usually add Spotify to Notion in one of two ways:
