@@ -530,7 +530,7 @@ input[type="color"].form-input {
   border: none;
   border-radius: 12px;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .widget-card.widget-clock,
@@ -539,7 +539,27 @@ input[type="color"].form-input {
   border: 1px solid #e8e6e3;
   border-radius: 6px;
   background: #f4f3f1;
-  min-height: clamp(178px, 34vmin, 206px);
+  min-height: clamp(146px, 30vmin, 196px);
+}
+
+body.is-embed .widget-card.widget-clock.is-embed,
+body.is-embed .widget-card.widget-countdown.is-embed {
+  padding: clamp(10px, 2.2vh, 16px) clamp(10px, 2.2vh, 14px);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  min-height: 0;
+  height: 100%;
+  --widget-text-strong: #37352f;
+  --widget-text-soft: #787774;
+}
+
+@media (prefers-color-scheme: dark) {
+  body.is-embed .widget-card.widget-clock.is-embed,
+  body.is-embed .widget-card.widget-countdown.is-embed {
+    --widget-text-strong: #f1f1ef;
+    --widget-text-soft: #a5a59f;
+  }
 }
 
 .widget-card[data-layout="compact"] {
@@ -612,7 +632,7 @@ input[type="color"].form-input {
   text-align: center;
   background: transparent;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   --widget-display-size: clamp(30px, 8.6vmin, 58px);
   --widget-meta-size: clamp(12px, 2.8vmin, 14px);
   --widget-kicker-size: clamp(11px, 2.4vmin, 12px);
@@ -789,7 +809,7 @@ body.is-embed .focus-clock {
   display: grid;
   gap: 8px;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   place-items: center;
   text-align: center;
@@ -944,6 +964,33 @@ body.is-embed .countdown {
   .countdown-label-small {
     font-size: clamp(9px, 1.9vmin, 10px);
     letter-spacing: 0.05em;
+  }
+}
+
+@media (max-height: 230px) {
+  .focus-clock,
+  .countdown {
+    gap: 4px;
+  }
+
+  .focus-clock {
+    --widget-display-size: clamp(20px, 8.6vh, 40px);
+    --widget-meta-size: clamp(10px, 3.1vh, 12px);
+    --widget-kicker-size: clamp(9px, 2.4vh, 10px);
+  }
+
+  .countdown {
+    --widget-display-size: clamp(18px, 8vh, 34px);
+    --widget-meta-size: clamp(10px, 3.1vh, 12px);
+    --widget-kicker-size: clamp(9px, 2.2vh, 10px);
+  }
+
+  .countdown-grid {
+    gap: 4px;
+  }
+
+  .countdown-meta-minimal {
+    margin-top: 3px;
   }
 }
 
