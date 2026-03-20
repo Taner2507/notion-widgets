@@ -8,8 +8,10 @@ import { decodeWidgetConfig } from "@/src/lib/widget-utils";
 
 export default function EmbedShell({ widgetType, encodedConfig }) {
   useEffect(() => {
+    document.documentElement.classList.add("is-embed");
     document.body.classList.add("is-embed");
     return () => {
+      document.documentElement.classList.remove("is-embed");
       document.body.classList.remove("is-embed");
     };
   }, []);
