@@ -1579,7 +1579,15 @@ body.is-embed .sp.sp-embed .sp-cover-empty {
     grid-template-columns: 1fr;
   }
 
-  .countdown-grid {
+  body:not(.is-embed) .countdown-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+body.is-embed .countdown-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+body.is-embed .countdown:not(.has-seconds) .countdown-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }

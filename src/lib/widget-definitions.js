@@ -12,7 +12,8 @@ export const widgetCatalog = {
       visualStyle: "notion",
       motionStyle: "soft",
       themeMode: "auto",
-      surfaceMode: "transparent"
+      surfaceMode: "transparent",
+      notionCanvas: "auto"
     },
     fields: [
       { key: "layout", label: "Layout", type: "select", options: layoutOptions },
@@ -22,7 +23,8 @@ export const widgetCatalog = {
       { key: "visualStyle", label: "Clock style", type: "select", options: clockStyleOptions },
       { key: "motionStyle", label: "Motion", type: "select", options: clockMotionOptions },
       { key: "themeMode", label: "Theme", type: "select", options: widgetThemeOptions },
-      { key: "surfaceMode", label: "Surface", type: "select", options: widgetSurfaceOptions }
+      { key: "surfaceMode", label: "Surface", type: "select", options: widgetSurfaceOptions },
+      { key: "notionCanvas", label: "Notion canvas", type: "select", options: notionCanvasOptions }
     ]
   },
   countdown: {
@@ -42,7 +44,8 @@ export const widgetCatalog = {
       visualStyle: "notion",
       motionStyle: "soft",
       themeMode: "auto",
-      surfaceMode: "transparent"
+      surfaceMode: "transparent",
+      notionCanvas: "auto"
     },
     fields: [
       { key: "label", label: "Top label", type: "text", maxLength: 40 },
@@ -56,7 +59,8 @@ export const widgetCatalog = {
       { key: "visualStyle", label: "Countdown style", type: "select", options: countdownStyleOptions },
       { key: "motionStyle", label: "Motion", type: "select", options: countdownMotionOptions },
       { key: "themeMode", label: "Theme", type: "select", options: widgetThemeOptions },
-      { key: "surfaceMode", label: "Surface", type: "select", options: widgetSurfaceOptions }
+      { key: "surfaceMode", label: "Surface", type: "select", options: widgetSurfaceOptions },
+      { key: "notionCanvas", label: "Notion canvas", type: "select", options: notionCanvasOptions }
     ]
   },
   quote: {
@@ -202,5 +206,16 @@ function widgetSurfaceOptions() {
     { value: "transparent", label: "Transparent" },
     { value: "soft", label: "Soft" },
     { value: "card", label: "Card" }
+  ];
+}
+
+function notionCanvasOptions() {
+  return [
+    { value: "auto", label: "Auto" },
+    { value: "light-page", label: "Light Page (#FFFFFF)" },
+    { value: "light-sidebar", label: "Light Sidebar (#F7F6F3)" },
+    { value: "dark-page", label: "Dark Page (#191919)" },
+    { value: "dark-sidebar", label: "Dark Sidebar (#2F3438)" },
+    { value: "dark-sidebar-alt", label: "Dark Sidebar Alt (#373C3F)" }
   ];
 }

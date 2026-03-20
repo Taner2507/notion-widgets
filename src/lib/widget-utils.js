@@ -1,8 +1,8 @@
 import { widgetCatalog } from "@/src/lib/widget-definitions";
 
 export function applyThemeVariables(config, type) {
-  const themeTokens = resolveWidgetThemeTokens(config.themeMode);
-  const surfaceTokens = resolveWidgetSurfaceTokens(config.surfaceMode, config.themeMode);
+  const themeTokens = resolveWidgetThemeTokens(config.themeMode, config.notionCanvas);
+  const surfaceTokens = resolveWidgetSurfaceTokens(config.surfaceMode, config.themeMode, config.notionCanvas);
 
   if (type === "clock") {
     return {
@@ -38,7 +38,16 @@ export function applyThemeVariables(config, type) {
   };
 }
 
-function resolveWidgetThemeTokens(themeMode) {
+function resolveWidgetThemeTokens(themeMode, notionCanvas) {
+  const notionCanvasTokens = resolveNotionCanvasTokens(notionCanvas);
+
+  if (notionCanvasTokens && themeMode === "auto") {
+    return {
+      textStrong: notionCanvasTokens.textStrong,
+      textSoft: notionCanvasTokens.textSoft
+    };
+  }
+
   if (themeMode === "light") {
     return { textStrong: "#2f2e2a", textSoft: "#6d6a64" };
   }
@@ -53,9 +62,25 @@ function resolveWidgetThemeTokens(themeMode) {
   };
 }
 
-function resolveWidgetSurfaceTokens(surfaceMode, themeMode) {
+function resolveWidgetSurfaceTokens(surfaceMode, themeMode, notionCanvas) {
+  const notionCanvasTokens = resolveNotionCanvasTokens(notionCanvas);
+
   if (surfaceMode === "transparent") {
     return { surfaceBg: "transparent", surfaceBorder: "transparent" };
+  }
+
+  if (notionCanvasTokens) {
+    if (surfaceMode === "card") {
+      return {
+        surfaceBg: notionCanvasTokens.surface,
+        surfaceBorder: notionCanvasTokens.surfaceBorder
+      };
+    }
+
+    return {
+      surfaceBg: notionCanvasTokens.surfaceSoft,
+      surfaceBorder: notionCanvasTokens.surfaceSoftBorder
+    };
   }
 
   if (themeMode === "dark") {
@@ -85,6 +110,58 @@ function resolveWidgetSurfaceTokens(surfaceMode, themeMode) {
     surfaceBg: "var(--widget-auto-surface-bg-soft, #f4f3f1cc)",
     surfaceBorder: "var(--widget-auto-surface-border-soft, #e6e3de99)"
   };
+}
+
+function resolveNotionCanvasTokens(notionCanvas) {
+  switch (notionCanvas) {
+    case "light-page":
+      return {
+        textStrong: "#2f2e2a",
+        textSoft: "#6d6a64",
+        surface: "#FFFFFF",
+        surfaceBorder: "#e8e6e3",
+        surfaceSoft: "#FFFFFFCC",
+        surfaceSoftBorder: "#e8e6e399"
+      };
+    case "light-sidebar":
+      return {
+        textStrong: "#2f2e2a",
+        textSoft: "#6d6a64",
+        surface: "#F7F6F3",
+        surfaceBorder: "#e4e1da",
+        surfaceSoft: "#F7F6F3CC",
+        surfaceSoftBorder: "#e4e1da99"
+      };
+    case "dark-page":
+      return {
+        textStrong: "#f1f1ef",
+        textSoft: "#a7a6a2",
+        surface: "#191919",
+        surfaceBorder: "#2d2d2d",
+        surfaceSoft: "#191919CC",
+        surfaceSoftBorder: "#2d2d2d99"
+      };
+    case "dark-sidebar":
+      return {
+        textStrong: "#f1f1ef",
+        textSoft: "#a7a6a2",
+        surface: "#2F3438",
+        surfaceBorder: "#464d52",
+        surfaceSoft: "#2F3438CC",
+        surfaceSoftBorder: "#464d5299"
+      };
+    case "dark-sidebar-alt":
+      return {
+        textStrong: "#f1f1ef",
+        textSoft: "#a7a6a2",
+        surface: "#373C3F",
+        surfaceBorder: "#4a5054",
+        surfaceSoft: "#373C3FCC",
+        surfaceSoftBorder: "#4a505499"
+      };
+    default:
+      return null;
+  }
 }
 
 export function resolveAccentStrong(hex) {
