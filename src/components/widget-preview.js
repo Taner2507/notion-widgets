@@ -18,7 +18,7 @@ const SPOTIFY_SESSION_KEY = "notion-widget-platform/spotify-session";
 const SPOTIFY_PKCE_VERIFIER_KEY = "notion-widget-platform/spotify-pkce-verifier";
 
 export default function WidgetPreview({ type, config, embedMode = false }) {
-  const themeStyle = useMemo(() => applyThemeVariables(config), [config]);
+  const themeStyle = useMemo(() => applyThemeVariables(config, type), [config, type]);
 
   return (
     <section
@@ -35,24 +35,16 @@ export default function WidgetPreview({ type, config, embedMode = false }) {
 }
 
 function ClockWidget({ config }) {
-  const prompts = useMemo(
-    () => config.prompts.split("\n").map((prompt) => prompt.trim()).filter(Boolean),
-    [config.prompts]
-  );
-  const [promptIndex, setPromptIndex] = useState(0);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    setPromptIndex(0);
-  }, [config.prompts]);
-
-  useEffect(() => {
+    const tickMs = config.showSeconds ? 1000 : 15_000;
     const timer = window.setInterval(() => {
       setNow(new Date());
-    }, 1000);
+    }, tickMs);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [config.showSeconds]);
 
   const hours = now.getHours();
   const displayHour = config.use24Hour ? hours : hours % 12 || 12;
@@ -62,39 +54,65 @@ function ClockWidget({ config }) {
     timeParts.push(pad(now.getSeconds()));
   }
 
-  const dateText = config.showDate
-    ? now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })
-    : "Your local time, live in Notion.";
+  const dateText = now.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+  const timeText = timeParts.join(":");
+  const meridiem = hours >= 12 ? "PM" : "AM";
+  const visualStyle = config.visualStyle || "notion";
+  const motionStyle = config.motionStyle || "soft";
+  const [changedIndexes, setChangedIndexes] = useState([]);
+  const previousTimeRef = useRef(timeText);
+
+  useEffect(() => {
+    const previousTime = previousTimeRef.current;
+    if (previousTime === timeText) return;
+
+    const nextChanged = [];
+    const maxLength = Math.max(previousTime.length, timeText.length);
+
+    for (let i = 0; i < maxLength; i += 1) {
+      if (previousTime[i] !== timeText[i] && timeText[i] !== ":") {
+        nextChanged.push(i);
+      }
+    }
+
+    setChangedIndexes(nextChanged);
+    previousTimeRef.current = timeText;
+
+    const resetTimer = window.setTimeout(() => {
+      setChangedIndexes([]);
+    }, 340);
+
+    return () => window.clearTimeout(resetTimer);
+  }, [timeText]);
 
   return (
-    <>
-      <div className="widget-header">
-        <div>
-          <p className="widget-eyebrow">{config.label}</p>
-          <h2 className="widget-title">{config.title}</h2>
-        </div>
-        <span className="tag">Live</span>
-      </div>
-      <p className="clock-time">
-        {timeParts.join(":")}
-        {config.use24Hour ? "" : ` ${hours >= 12 ? "PM" : "AM"}`}
+    <div
+      className={`focus-clock${config.showSeconds ? " has-seconds" : ""} style-${visualStyle} motion-${motionStyle}`}
+    >
+      <p key={timeText} className="focus-clock-time" aria-label={`Current time ${timeText}`}>
+        <span className="focus-clock-digits" aria-hidden="true">
+          {Array.from(timeText).map((character, index) => (
+            <span
+              key={index}
+              className={[
+                "focus-clock-digit",
+                character === ":" ? "is-separator" : "",
+                changedIndexes.includes(index) ? "is-changed" : ""
+              ].filter(Boolean).join(" ")}
+            >
+              {character}
+            </span>
+          ))}
+        </span>
+        {!config.use24Hour ? <span className="focus-clock-meridiem"> {meridiem}</span> : null}
       </p>
-      <p className="widget-meta">{dateText}</p>
-      <div className="widget-divider"></div>
-      <div className="prompt-card">
-        <p className="widget-eyebrow">Focus Prompt</p>
-        <p className="muted-text">{prompts[promptIndex] || "Add prompts in the builder."}</p>
-      </div>
-      <div className="button-row" style={{ marginTop: 18 }}>
-        <button
-          className="primary-button"
-          type="button"
-          onClick={() => setPromptIndex((currentIndex) => (currentIndex + 1) % Math.max(prompts.length, 1))}
-        >
-          New prompt
-        </button>
-      </div>
-    </>
+      <p className="focus-clock-meta">{dateText}</p>
+    </div>
   );
 }
 
@@ -102,52 +120,129 @@ function CountdownWidget({ config }) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
+    const tickMs = config.showSeconds ? 1000 : 15_000;
     const timer = window.setInterval(() => {
       setNow(Date.now());
-    }, 1000);
+    }, tickMs);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [config.showSeconds]);
 
   const targetTime = new Date(config.targetDate).getTime();
-  const remaining = Math.max(targetTime - now, 0);
+  const hasValidTarget = Number.isFinite(targetTime);
+  const remaining = hasValidTarget ? Math.max(targetTime - now, 0) : 0;
   const totalSeconds = Math.floor(remaining / 1000);
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
+  const visualStyle = config.visualStyle || "notion";
+  const motionStyle = config.motionStyle || "soft";
+  const metaPrefix = config.metaPrefix === "due" ? "Due" : "Target";
+  const isComplete = hasValidTarget && remaining === 0;
+  const units = useMemo(() => {
+    const baseUnits = [
+      { label: "Days", value: String(days) },
+      { label: "Hours", value: pad(hours) },
+      { label: "Minutes", value: pad(minutes) }
+    ];
+
+    if (config.showSeconds) {
+      baseUnits.push({ label: "Seconds", value: pad(seconds) });
+    }
+
+    return baseUnits;
+  }, [days, hours, minutes, seconds, config.showSeconds]);
+
+  const unitsKey = useMemo(
+    () => units.map((unit) => `${unit.label}:${unit.value}`).join("|"),
+    [units]
+  );
+  const [changedByUnit, setChangedByUnit] = useState({});
+  const previousValuesRef = useRef(Object.fromEntries(units.map((unit) => [unit.label, unit.value])));
+
+  useEffect(() => {
+    const previous = previousValuesRef.current;
+    const nextChangedByUnit = {};
+
+    units.forEach((unit) => {
+      const previousValue = previous[unit.label] || "";
+      if (previousValue === unit.value) return;
+
+      const changedIndexes = [];
+      const maxLength = Math.max(previousValue.length, unit.value.length);
+
+      for (let i = 0; i < maxLength; i += 1) {
+        if (previousValue[i] !== unit.value[i] && unit.value[i] !== undefined) {
+          changedIndexes.push(i);
+        }
+      }
+
+      if (changedIndexes.length) {
+        nextChangedByUnit[unit.label] = changedIndexes;
+      }
+    });
+
+    setChangedByUnit(nextChangedByUnit);
+    previousValuesRef.current = Object.fromEntries(units.map((unit) => [unit.label, unit.value]));
+
+    if (!Object.keys(nextChangedByUnit).length) return;
+    const resetMs = motionStyle === "crisp" ? 190 : motionStyle === "fade" ? 230 : 340;
+    const resetTimer = window.setTimeout(() => {
+      setChangedByUnit({});
+    }, resetMs);
+
+    return () => window.clearTimeout(resetTimer);
+  }, [units, unitsKey, motionStyle]);
+
+  const targetLabel = hasValidTarget
+    ? new Date(targetTime).toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    })
+    : "Set a valid target date.";
+  const titleText = String(config.title || "").trim();
+  const statusText = isComplete ? config.completionText : `${metaPrefix}: ${targetLabel}`;
 
   return (
-    <>
-      <div className="widget-header">
-        <div>
-          <p className="countdown-eyebrow">{config.label}</p>
-          <h2 className="countdown-title">{config.title}</h2>
-        </div>
-        <span className="tag">Deadline</span>
-      </div>
-      <p className="widget-meta">
-        {remaining === 0 ? config.completionText : `Target: ${new Date(config.targetDate).toLocaleString()}`}
-      </p>
+    <div
+      className={`countdown${config.showSeconds ? " has-seconds" : ""} style-${visualStyle} motion-${motionStyle}${isComplete ? " is-complete" : ""}`}
+    >
       <div className="countdown-grid">
-        <div className="countdown-unit">
-          <span className="countdown-value">{days}</span>
-          <span className="countdown-label-small">Days</span>
-        </div>
-        <div className="countdown-unit">
-          <span className="countdown-value">{pad(hours)}</span>
-          <span className="countdown-label-small">Hours</span>
-        </div>
-        <div className="countdown-unit">
-          <span className="countdown-value">{pad(minutes)}</span>
-          <span className="countdown-label-small">Minutes</span>
-        </div>
-        <div className="countdown-unit">
-          <span className="countdown-value">{config.showSeconds ? pad(seconds) : "--"}</span>
-          <span className="countdown-label-small">Seconds</span>
-        </div>
+        {units.map((unit) => (
+          <div key={unit.label} className="countdown-unit">
+            <span
+              className="countdown-value"
+              aria-label={`${unit.label} ${unit.value}`}
+              aria-live={unit.label === "Seconds" ? "polite" : undefined}
+            >
+              <span className="countdown-value-digits" aria-hidden="true">
+                {Array.from(unit.value).map((character, index) => (
+                  <span
+                    key={index}
+                    className={[
+                      "countdown-value-digit",
+                      changedByUnit[unit.label]?.includes(index) ? "is-changed" : ""
+                    ].filter(Boolean).join(" ")}
+                  >
+                    {character}
+                  </span>
+                ))}
+              </span>
+            </span>
+            <span className="countdown-label-small">{unit.label}</span>
+          </div>
+        ))}
       </div>
-    </>
+      <p className="countdown-meta-minimal">
+        {titleText ? <span className="countdown-meta-title">{titleText}</span> : null}
+        {titleText ? <span className="countdown-meta-separator" aria-hidden="true"> · </span> : null}
+        <span className="countdown-meta-status">{statusText}</span>
+      </p>
+    </div>
   );
 }
 

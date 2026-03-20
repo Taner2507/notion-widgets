@@ -1,6 +1,24 @@
 import { widgetCatalog } from "@/src/lib/widget-definitions";
 
-export function applyThemeVariables(config) {
+export function applyThemeVariables(config, type) {
+  if (type === "clock") {
+    return {
+      "--text-strong": "#37352f",
+      "--text-soft": "#787774",
+      "--accent": config.accent,
+      "--accent-strong": "#37352f"
+    };
+  }
+
+  if (type === "countdown") {
+    return {
+      "--text-strong": "#37352f",
+      "--text-soft": "#787774",
+      "--accent": config.accent,
+      "--accent-strong": resolveAccentStrong(config.accent)
+    };
+  }
+
   return {
     "--text-strong": "#eef5ff",
     "--text-soft": "#afc1d4",

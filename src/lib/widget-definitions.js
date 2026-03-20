@@ -3,41 +3,40 @@ export const widgetCatalog = {
     id: "clock",
     name: "Focus Clock",
     icon: "◴",
-    description: "A live clock with prompts for deep work pages.",
+    description: "A clean, minimal date and time display for Notion.",
     defaults: {
-      label: "Focus Clock",
-      title: "Today",
       layout: "classic",
-      accent: "#d56c37",
-      showDate: true,
+      accent: "#37352f",
       showSeconds: false,
       use24Hour: false,
-      prompts: "Pick one meaningful task and finish it before opening anything new.\nMake the next 25 minutes distraction-free.\nClear one stubborn task you have been postponing."
+      visualStyle: "notion",
+      motionStyle: "soft"
     },
     fields: [
-      { key: "label", label: "Top label", type: "text", maxLength: 40 },
-      { key: "title", label: "Title", type: "text", maxLength: 24 },
       { key: "layout", label: "Layout", type: "select", options: layoutOptions },
       { key: "accent", label: "Accent color", type: "color" },
-      { key: "showDate", label: "Show date", type: "checkbox" },
       { key: "showSeconds", label: "Show seconds", type: "checkbox" },
       { key: "use24Hour", label: "Use 24-hour time", type: "checkbox" },
-      { key: "prompts", label: "Prompts", type: "textarea", help: "One prompt per line." }
+      { key: "visualStyle", label: "Clock style", type: "select", options: clockStyleOptions },
+      { key: "motionStyle", label: "Motion", type: "select", options: clockMotionOptions }
     ]
   },
   countdown: {
     id: "countdown",
     name: "Countdown",
     icon: "◷",
-    description: "Count down to launches, exams, travel, and milestones.",
+    description: "A clean countdown with responsive layouts and subtle motion.",
     defaults: {
-      label: "Big Moment",
-      title: "Launch Day",
+      label: "Countdown",
+      title: "Big Moment",
       layout: "spotlight",
-      accent: "#2e8dc2",
+      accent: "#2383e2",
       targetDate: getDefaultFutureDate(),
+      metaPrefix: "target",
       showSeconds: false,
-      completionText: "It is live."
+      completionText: "It is live.",
+      visualStyle: "notion",
+      motionStyle: "soft"
     },
     fields: [
       { key: "label", label: "Top label", type: "text", maxLength: 40 },
@@ -45,8 +44,11 @@ export const widgetCatalog = {
       { key: "layout", label: "Layout", type: "select", options: layoutOptions },
       { key: "accent", label: "Accent color", type: "color" },
       { key: "targetDate", label: "Target date", type: "datetime-local" },
+      { key: "metaPrefix", label: "Label", type: "select", options: countdownPrefixOptions },
       { key: "showSeconds", label: "Show seconds", type: "checkbox" },
-      { key: "completionText", label: "Completion message", type: "text", maxLength: 60 }
+      { key: "completionText", label: "Completion message", type: "text", maxLength: 60 },
+      { key: "visualStyle", label: "Countdown style", type: "select", options: countdownStyleOptions },
+      { key: "motionStyle", label: "Motion", type: "select", options: countdownMotionOptions }
     ]
   },
   quote: {
@@ -133,5 +135,48 @@ function layoutOptions() {
     { value: "classic", label: "Classic Card" },
     { value: "compact", label: "Compact Stack" },
     { value: "spotlight", label: "Spotlight" }
+  ];
+}
+
+function clockStyleOptions() {
+  return [
+    { value: "notion", label: "Notion Clean" },
+    { value: "mono", label: "Mono Grid" },
+    { value: "editorial", label: "Editorial Calm" },
+    { value: "signal", label: "Signal Accent" }
+  ];
+}
+
+function clockMotionOptions() {
+  return [
+    { value: "soft", label: "Soft Flip" },
+    { value: "crisp", label: "Crisp Tick" },
+    { value: "fade", label: "Fade Pulse" },
+    { value: "none", label: "None" }
+  ];
+}
+
+function countdownStyleOptions() {
+  return [
+    { value: "notion", label: "Notion Clean" },
+    { value: "mono", label: "Mono Grid" },
+    { value: "editorial", label: "Editorial Calm" },
+    { value: "signal", label: "Signal Accent" }
+  ];
+}
+
+function countdownMotionOptions() {
+  return [
+    { value: "soft", label: "Soft Tick" },
+    { value: "crisp", label: "Crisp Tick" },
+    { value: "fade", label: "Fade Pulse" },
+    { value: "none", label: "None" }
+  ];
+}
+
+function countdownPrefixOptions() {
+  return [
+    { value: "target", label: "Target" },
+    { value: "due", label: "Due" }
   ];
 }
