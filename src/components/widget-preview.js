@@ -22,7 +22,7 @@ export default function WidgetPreview({ type, config, embedMode = false }) {
 
   return (
     <section
-      className={`widget-card${embedMode ? " is-embed" : ""}`}
+      className={`widget-card widget-${type}${embedMode ? " is-embed" : ""}`}
       data-layout={config.layout}
       style={themeStyle}
     >
