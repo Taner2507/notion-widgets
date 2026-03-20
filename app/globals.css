@@ -558,7 +558,7 @@ input[type="color"].form-input {
 
 .widget-card.widget-clock,
 .widget-card.widget-countdown {
-  padding: clamp(16px, 3.4vmin, 20px) clamp(14px, 3.2vmin, 18px);
+  padding: clamp(14px, 3vmin, 18px) clamp(12px, 2.8vmin, 16px);
   border: 1px solid var(--widget-surface-border, #e8e6e3);
   border-radius: 6px;
   background: var(--widget-surface-bg, #f4f3f1);
@@ -636,7 +636,7 @@ body.is-embed .widget-card.widget-countdown.is-embed {
 /* Clock */
 .focus-clock {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   place-items: center;
   text-align: center;
@@ -649,7 +649,7 @@ body.is-embed .widget-card.widget-countdown.is-embed {
 }
 
 .countdown {
-  --widget-display-size: clamp(30px, 8.6vmin, 58px);
+  --widget-display-size: clamp(32px, 9.2vmin, 62px);
   --widget-meta-size: clamp(12px, 2.8vmin, 14px);
   --widget-kicker-size: clamp(11px, 2.4vmin, 12px);
 }
@@ -892,7 +892,7 @@ body.is-embed .focus-clock {
   margin-top: 1px;
   font-size: clamp(10px, 2.2vmin, 11px);
   font-weight: 500;
-  color: color-mix(in srgb, var(--text-soft) 88%, #ffffff);
+  color: color-mix(in srgb, var(--text-soft) 84%, var(--text-strong));
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }

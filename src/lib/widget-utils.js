@@ -1,15 +1,14 @@
 import { widgetCatalog } from "@/src/lib/widget-definitions";
 
 export function applyThemeVariables(config, type) {
-  const themeTokens = resolveWidgetThemeTokens(config.themeMode, config.notionCanvas);
-  const surfaceTokens = resolveWidgetSurfaceTokens(config.surfaceMode, config.themeMode, config.notionCanvas);
+  const colorTokens = resolveWidgetColorTokens(config);
 
   if (type === "clock") {
     return {
-      "--widget-text-strong": themeTokens.textStrong,
-      "--widget-text-soft": themeTokens.textSoft,
-      "--widget-surface-bg": surfaceTokens.surfaceBg,
-      "--widget-surface-border": surfaceTokens.surfaceBorder,
+      "--widget-text-strong": colorTokens.textStrong,
+      "--widget-text-soft": colorTokens.textSoft,
+      "--widget-surface-bg": colorTokens.surfaceBg,
+      "--widget-surface-border": colorTokens.surfaceBorder,
       "--text-strong": "var(--widget-text-strong)",
       "--text-soft": "var(--widget-text-soft)",
       "--accent": config.accent,
@@ -19,10 +18,10 @@ export function applyThemeVariables(config, type) {
 
   if (type === "countdown") {
     return {
-      "--widget-text-strong": themeTokens.textStrong,
-      "--widget-text-soft": themeTokens.textSoft,
-      "--widget-surface-bg": surfaceTokens.surfaceBg,
-      "--widget-surface-border": surfaceTokens.surfaceBorder,
+      "--widget-text-strong": colorTokens.textStrong,
+      "--widget-text-soft": colorTokens.textSoft,
+      "--widget-surface-bg": colorTokens.surfaceBg,
+      "--widget-surface-border": colorTokens.surfaceBorder,
       "--text-strong": "var(--widget-text-strong)",
       "--text-soft": "var(--widget-text-soft)",
       "--accent": config.accent,
@@ -38,130 +37,62 @@ export function applyThemeVariables(config, type) {
   };
 }
 
-function resolveWidgetThemeTokens(themeMode, notionCanvas) {
-  const notionCanvasTokens = resolveNotionCanvasTokens(notionCanvas);
-
-  if (notionCanvasTokens && themeMode === "auto") {
-    return {
-      textStrong: notionCanvasTokens.textStrong,
-      textSoft: notionCanvasTokens.textSoft
-    };
-  }
-
-  if (themeMode === "light") {
-    return { textStrong: "#2f2e2a", textSoft: "#6d6a64" };
-  }
-
-  if (themeMode === "dark") {
-    return { textStrong: "#f1f1ef", textSoft: "#a7a6a2" };
-  }
+function resolveWidgetColorTokens(config) {
+  const preset = resolveNotionBackgroundPreset(config.backgroundPreset);
+  const surfaceBg = preset ? preset.background : (config.backgroundColor || "#FFFFFF");
+  const textStrong = config.textColor || (preset ? preset.text : "#2f2e2a");
 
   return {
-    textStrong: "var(--widget-auto-text-strong, #2f2e2a)",
-    textSoft: "var(--widget-auto-text-soft, #6d6a64)"
+    surfaceBg,
+    surfaceBorder: resolveSurfaceBorder(surfaceBg),
+    textStrong,
+    textSoft: `color-mix(in srgb, ${textStrong} 68%, ${surfaceBg})`
   };
 }
 
-function resolveWidgetSurfaceTokens(surfaceMode, themeMode, notionCanvas) {
-  const notionCanvasTokens = resolveNotionCanvasTokens(notionCanvas);
-
-  if (surfaceMode === "transparent") {
-    return { surfaceBg: "transparent", surfaceBorder: "transparent" };
-  }
-
-  if (notionCanvasTokens) {
-    if (surfaceMode === "card") {
+function resolveNotionBackgroundPreset(backgroundPreset) {
+  switch (backgroundPreset) {
+    case "transparent":
       return {
-        surfaceBg: notionCanvasTokens.surface,
-        surfaceBorder: notionCanvasTokens.surfaceBorder
+        background: "transparent",
+        text: "var(--widget-auto-text-strong, #2f2e2a)"
       };
-    }
-
-    return {
-      surfaceBg: notionCanvasTokens.surfaceSoft,
-      surfaceBorder: notionCanvasTokens.surfaceSoftBorder
-    };
-  }
-
-  if (themeMode === "dark") {
-    if (surfaceMode === "card") {
-      return { surfaceBg: "#262522", surfaceBorder: "#3c3b37" };
-    }
-
-    return { surfaceBg: "#2b2a26cc", surfaceBorder: "#3c3b3799" };
-  }
-
-  if (themeMode === "light") {
-    if (surfaceMode === "card") {
-      return { surfaceBg: "#f4f3f1", surfaceBorder: "#e6e3de" };
-    }
-
-    return { surfaceBg: "#f4f3f1cc", surfaceBorder: "#e6e3de99" };
-  }
-
-  if (surfaceMode === "card") {
-    return {
-      surfaceBg: "var(--widget-auto-surface-bg-card, #f4f3f1)",
-      surfaceBorder: "var(--widget-auto-surface-border-card, #e6e3de)"
-    };
-  }
-
-  return {
-    surfaceBg: "var(--widget-auto-surface-bg-soft, #f4f3f1cc)",
-    surfaceBorder: "var(--widget-auto-surface-border-soft, #e6e3de99)"
-  };
-}
-
-function resolveNotionCanvasTokens(notionCanvas) {
-  switch (notionCanvas) {
     case "light-page":
       return {
-        textStrong: "#2f2e2a",
-        textSoft: "#6d6a64",
-        surface: "#FFFFFF",
-        surfaceBorder: "#e8e6e3",
-        surfaceSoft: "#FFFFFFCC",
-        surfaceSoftBorder: "#e8e6e399"
+        background: "#FFFFFF",
+        text: "#2f2e2a"
       };
     case "light-sidebar":
       return {
-        textStrong: "#2f2e2a",
-        textSoft: "#6d6a64",
-        surface: "#F7F6F3",
-        surfaceBorder: "#e4e1da",
-        surfaceSoft: "#F7F6F3CC",
-        surfaceSoftBorder: "#e4e1da99"
+        background: "#F7F6F3",
+        text: "#2f2e2a"
       };
     case "dark-page":
       return {
-        textStrong: "#f1f1ef",
-        textSoft: "#a7a6a2",
-        surface: "#191919",
-        surfaceBorder: "#2d2d2d",
-        surfaceSoft: "#191919CC",
-        surfaceSoftBorder: "#2d2d2d99"
+        background: "#191919",
+        text: "#f1f1ef"
       };
     case "dark-sidebar":
       return {
-        textStrong: "#f1f1ef",
-        textSoft: "#a7a6a2",
-        surface: "#2F3438",
-        surfaceBorder: "#464d52",
-        surfaceSoft: "#2F3438CC",
-        surfaceSoftBorder: "#464d5299"
+        background: "#2F3438",
+        text: "#f1f1ef"
       };
     case "dark-sidebar-alt":
       return {
-        textStrong: "#f1f1ef",
-        textSoft: "#a7a6a2",
-        surface: "#373C3F",
-        surfaceBorder: "#4a5054",
-        surfaceSoft: "#373C3FCC",
-        surfaceSoftBorder: "#4a505499"
+        background: "#373C3F",
+        text: "#f1f1ef"
       };
     default:
       return null;
   }
+}
+
+function resolveSurfaceBorder(background) {
+  if (background === "transparent") {
+    return "transparent";
+  }
+
+  return `color-mix(in srgb, ${background} 84%, #000000)`;
 }
 
 export function resolveAccentStrong(hex) {
