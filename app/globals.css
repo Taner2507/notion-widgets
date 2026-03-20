@@ -559,7 +559,7 @@ input[type="color"].form-input {
 .widget-card.widget-clock,
 .widget-card.widget-countdown {
   padding: clamp(14px, 3vmin, 18px) clamp(12px, 2.8vmin, 16px);
-  border: 1px solid var(--widget-surface-border, #e8e6e3);
+  border: 1px solid var(--widget-border-color, var(--widget-surface-border, #e8e6e3));
   border-radius: 6px;
   background: var(--widget-surface-bg, #f4f3f1);
   min-height: clamp(146px, 30vmin, 196px);

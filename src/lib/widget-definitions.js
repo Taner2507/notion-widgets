@@ -13,7 +13,8 @@ export const widgetCatalog = {
       motionStyle: "soft",
       backgroundPreset: "transparent",
       backgroundColor: "#FFFFFF",
-      textColor: "#2f2e2a"
+      textColor: "#2f2e2a",
+      showHairline: false
     },
     fields: [
       { key: "layout", label: "Layout", type: "select", options: layoutOptions },
@@ -24,7 +25,8 @@ export const widgetCatalog = {
       { key: "motionStyle", label: "Motion", type: "select", options: clockMotionOptions },
       { key: "backgroundPreset", label: "Background preset", type: "select", options: notionBackgroundPresetOptions },
       { key: "backgroundColor", label: "Background color", type: "color" },
-      { key: "textColor", label: "Text color", type: "color" }
+      { key: "textColor", label: "Text color", type: "color" },
+      { key: "showHairline", label: "Hairline border", type: "checkbox" }
     ]
   },
   countdown: {
@@ -45,7 +47,8 @@ export const widgetCatalog = {
       motionStyle: "soft",
       backgroundPreset: "transparent",
       backgroundColor: "#FFFFFF",
-      textColor: "#2f2e2a"
+      textColor: "#2f2e2a",
+      showHairline: false
     },
     fields: [
       { key: "label", label: "Top label", type: "text", maxLength: 40 },
@@ -60,7 +63,8 @@ export const widgetCatalog = {
       { key: "motionStyle", label: "Motion", type: "select", options: countdownMotionOptions },
       { key: "backgroundPreset", label: "Background preset", type: "select", options: notionBackgroundPresetOptions },
       { key: "backgroundColor", label: "Background color", type: "color" },
-      { key: "textColor", label: "Text color", type: "color" }
+      { key: "textColor", label: "Text color", type: "color" },
+      { key: "showHairline", label: "Hairline border", type: "checkbox" }
     ]
   },
   quote: {

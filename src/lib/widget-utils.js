@@ -9,6 +9,7 @@ export function applyThemeVariables(config, type) {
       "--widget-text-soft": colorTokens.textSoft,
       "--widget-surface-bg": colorTokens.surfaceBg,
       "--widget-surface-border": colorTokens.surfaceBorder,
+      "--widget-border-color": colorTokens.borderColor,
       "--text-strong": "var(--widget-text-strong)",
       "--text-soft": "var(--widget-text-soft)",
       "--accent": config.accent,
@@ -22,6 +23,7 @@ export function applyThemeVariables(config, type) {
       "--widget-text-soft": colorTokens.textSoft,
       "--widget-surface-bg": colorTokens.surfaceBg,
       "--widget-surface-border": colorTokens.surfaceBorder,
+      "--widget-border-color": colorTokens.borderColor,
       "--text-strong": "var(--widget-text-strong)",
       "--text-soft": "var(--widget-text-soft)",
       "--accent": config.accent,
@@ -41,10 +43,15 @@ function resolveWidgetColorTokens(config) {
   const preset = resolveNotionBackgroundPreset(config.backgroundPreset);
   const surfaceBg = preset ? preset.background : (config.backgroundColor || "#FFFFFF");
   const textStrong = config.textColor || (preset ? preset.text : "#2f2e2a");
+  const surfaceBorder = resolveSurfaceBorder(surfaceBg);
+  const borderColor = config.showHairline
+    ? `color-mix(in srgb, ${textStrong} 22%, transparent)`
+    : surfaceBorder;
 
   return {
     surfaceBg,
-    surfaceBorder: resolveSurfaceBorder(surfaceBg),
+    surfaceBorder,
+    borderColor,
     textStrong,
     textSoft: `color-mix(in srgb, ${textStrong} 68%, ${surfaceBg})`
   };
