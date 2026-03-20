@@ -10,7 +10,9 @@ export const widgetCatalog = {
       showSeconds: false,
       use24Hour: false,
       visualStyle: "notion",
-      motionStyle: "soft"
+      motionStyle: "soft",
+      themeMode: "auto",
+      surfaceMode: "transparent"
     },
     fields: [
       { key: "layout", label: "Layout", type: "select", options: layoutOptions },
@@ -18,7 +20,9 @@ export const widgetCatalog = {
       { key: "showSeconds", label: "Show seconds", type: "checkbox" },
       { key: "use24Hour", label: "Use 24-hour time", type: "checkbox" },
       { key: "visualStyle", label: "Clock style", type: "select", options: clockStyleOptions },
-      { key: "motionStyle", label: "Motion", type: "select", options: clockMotionOptions }
+      { key: "motionStyle", label: "Motion", type: "select", options: clockMotionOptions },
+      { key: "themeMode", label: "Theme", type: "select", options: widgetThemeOptions },
+      { key: "surfaceMode", label: "Surface", type: "select", options: widgetSurfaceOptions }
     ]
   },
   countdown: {
@@ -36,7 +40,9 @@ export const widgetCatalog = {
       showSeconds: false,
       completionText: "It is live.",
       visualStyle: "notion",
-      motionStyle: "soft"
+      motionStyle: "soft",
+      themeMode: "auto",
+      surfaceMode: "transparent"
     },
     fields: [
       { key: "label", label: "Top label", type: "text", maxLength: 40 },
@@ -48,7 +54,9 @@ export const widgetCatalog = {
       { key: "showSeconds", label: "Show seconds", type: "checkbox" },
       { key: "completionText", label: "Completion message", type: "text", maxLength: 60 },
       { key: "visualStyle", label: "Countdown style", type: "select", options: countdownStyleOptions },
-      { key: "motionStyle", label: "Motion", type: "select", options: countdownMotionOptions }
+      { key: "motionStyle", label: "Motion", type: "select", options: countdownMotionOptions },
+      { key: "themeMode", label: "Theme", type: "select", options: widgetThemeOptions },
+      { key: "surfaceMode", label: "Surface", type: "select", options: widgetSurfaceOptions }
     ]
   },
   quote: {
@@ -178,5 +186,21 @@ function countdownPrefixOptions() {
   return [
     { value: "target", label: "Target" },
     { value: "due", label: "Due" }
+  ];
+}
+
+function widgetThemeOptions() {
+  return [
+    { value: "auto", label: "Auto" },
+    { value: "light", label: "Light" },
+    { value: "dark", label: "Dark" }
+  ];
+}
+
+function widgetSurfaceOptions() {
+  return [
+    { value: "transparent", label: "Transparent" },
+    { value: "soft", label: "Soft" },
+    { value: "card", label: "Card" }
   ];
 }

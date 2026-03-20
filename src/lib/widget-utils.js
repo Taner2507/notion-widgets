@@ -1,19 +1,30 @@
 import { widgetCatalog } from "@/src/lib/widget-definitions";
 
 export function applyThemeVariables(config, type) {
+  const themeTokens = resolveWidgetThemeTokens(config.themeMode);
+  const surfaceTokens = resolveWidgetSurfaceTokens(config.surfaceMode, config.themeMode);
+
   if (type === "clock") {
     return {
-      "--text-strong": "var(--widget-text-strong, #37352f)",
-      "--text-soft": "var(--widget-text-soft, #787774)",
+      "--widget-text-strong": themeTokens.textStrong,
+      "--widget-text-soft": themeTokens.textSoft,
+      "--widget-surface-bg": surfaceTokens.surfaceBg,
+      "--widget-surface-border": surfaceTokens.surfaceBorder,
+      "--text-strong": "var(--widget-text-strong)",
+      "--text-soft": "var(--widget-text-soft)",
       "--accent": config.accent,
-      "--accent-strong": "var(--widget-text-strong, #37352f)"
+      "--accent-strong": "var(--widget-text-strong)"
     };
   }
 
   if (type === "countdown") {
     return {
-      "--text-strong": "var(--widget-text-strong, #37352f)",
-      "--text-soft": "var(--widget-text-soft, #787774)",
+      "--widget-text-strong": themeTokens.textStrong,
+      "--widget-text-soft": themeTokens.textSoft,
+      "--widget-surface-bg": surfaceTokens.surfaceBg,
+      "--widget-surface-border": surfaceTokens.surfaceBorder,
+      "--text-strong": "var(--widget-text-strong)",
+      "--text-soft": "var(--widget-text-soft)",
       "--accent": config.accent,
       "--accent-strong": resolveAccentStrong(config.accent)
     };
@@ -24,6 +35,55 @@ export function applyThemeVariables(config, type) {
     "--text-soft": "#afc1d4",
     "--accent": config.accent,
     "--accent-strong": resolveAccentStrong(config.accent)
+  };
+}
+
+function resolveWidgetThemeTokens(themeMode) {
+  if (themeMode === "light") {
+    return { textStrong: "#2f2e2a", textSoft: "#6d6a64" };
+  }
+
+  if (themeMode === "dark") {
+    return { textStrong: "#f1f1ef", textSoft: "#a7a6a2" };
+  }
+
+  return {
+    textStrong: "var(--widget-auto-text-strong, #2f2e2a)",
+    textSoft: "var(--widget-auto-text-soft, #6d6a64)"
+  };
+}
+
+function resolveWidgetSurfaceTokens(surfaceMode, themeMode) {
+  if (surfaceMode === "transparent") {
+    return { surfaceBg: "transparent", surfaceBorder: "transparent" };
+  }
+
+  if (themeMode === "dark") {
+    if (surfaceMode === "card") {
+      return { surfaceBg: "#262522", surfaceBorder: "#3c3b37" };
+    }
+
+    return { surfaceBg: "#2b2a26cc", surfaceBorder: "#3c3b3799" };
+  }
+
+  if (themeMode === "light") {
+    if (surfaceMode === "card") {
+      return { surfaceBg: "#f4f3f1", surfaceBorder: "#e6e3de" };
+    }
+
+    return { surfaceBg: "#f4f3f1cc", surfaceBorder: "#e6e3de99" };
+  }
+
+  if (surfaceMode === "card") {
+    return {
+      surfaceBg: "var(--widget-auto-surface-bg-card, #f4f3f1)",
+      surfaceBorder: "var(--widget-auto-surface-border-card, #e6e3de)"
+    };
+  }
+
+  return {
+    surfaceBg: "var(--widget-auto-surface-bg-soft, #f4f3f1cc)",
+    surfaceBorder: "var(--widget-auto-surface-border-soft, #e6e3de99)"
   };
 }
 

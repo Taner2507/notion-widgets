@@ -31,6 +31,25 @@
   --text-strong: #eef5ff;
   --text-soft: #afc1d4;
   --accent-strong: #8f4520;
+
+  /* Auto widget tokens for embed-aware theming */
+  --widget-auto-text-strong: #2f2e2a;
+  --widget-auto-text-soft: #6d6a64;
+  --widget-auto-surface-bg-soft: #f4f3f1cc;
+  --widget-auto-surface-border-soft: #e6e3de99;
+  --widget-auto-surface-bg-card: #f4f3f1;
+  --widget-auto-surface-border-card: #e6e3de;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --widget-auto-text-strong: #f1f1ef;
+    --widget-auto-text-soft: #a7a6a2;
+    --widget-auto-surface-bg-soft: #2b2a26cc;
+    --widget-auto-surface-border-soft: #3c3b3799;
+    --widget-auto-surface-bg-card: #262522;
+    --widget-auto-surface-border-card: #3c3b37;
+  }
 }
 
 /* --- Reset --- */
@@ -536,30 +555,17 @@ input[type="color"].form-input {
 .widget-card.widget-clock,
 .widget-card.widget-countdown {
   padding: clamp(16px, 3.4vmin, 20px) clamp(14px, 3.2vmin, 18px);
-  border: 1px solid #e8e6e3;
+  border: 1px solid var(--widget-surface-border, #e8e6e3);
   border-radius: 6px;
-  background: #f4f3f1;
+  background: var(--widget-surface-bg, #f4f3f1);
   min-height: clamp(146px, 30vmin, 196px);
 }
 
 body.is-embed .widget-card.widget-clock.is-embed,
 body.is-embed .widget-card.widget-countdown.is-embed {
   padding: clamp(10px, 2.2vh, 16px) clamp(10px, 2.2vh, 14px);
-  border: none;
-  border-radius: 0;
-  background: transparent;
   min-height: 0;
   height: 100%;
-  --widget-text-strong: #37352f;
-  --widget-text-soft: #787774;
-}
-
-@media (prefers-color-scheme: dark) {
-  body.is-embed .widget-card.widget-clock.is-embed,
-  body.is-embed .widget-card.widget-countdown.is-embed {
-    --widget-text-strong: #f1f1ef;
-    --widget-text-soft: #a5a59f;
-  }
 }
 
 .widget-card[data-layout="compact"] {
@@ -762,6 +768,8 @@ body.is-embed .widget-card.widget-countdown.is-embed {
 body.is-embed .focus-clock {
   height: 100%;
   align-content: center;
+  --widget-display-size: clamp(20px, 8.6vh, 48px);
+  --widget-meta-size: clamp(10px, 2.9vh, 13px);
 }
 
 @keyframes clock-digit-flip {
@@ -945,6 +953,9 @@ body.is-embed .focus-clock {
 body.is-embed .countdown {
   height: 100%;
   align-content: center;
+  --widget-display-size: clamp(18px, 7.6vh, 42px);
+  --widget-meta-size: clamp(10px, 2.9vh, 13px);
+  --widget-kicker-size: clamp(9px, 2.2vh, 10px);
 }
 
 @media (max-width: 380px), (max-height: 320px) {
@@ -1456,6 +1467,12 @@ body.is-embed .widget-card.is-embed {
   display: flex;
   align-items: stretch;
   overflow: hidden;
+}
+
+body.is-embed .widget-card.widget-clock.is-embed,
+body.is-embed .widget-card.widget-countdown.is-embed {
+  align-items: center;
+  overflow: visible;
 }
 
 body.is-embed .sp.sp-embed {
